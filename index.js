@@ -18,6 +18,10 @@ const { pushRepo } = require("./controllers/push");
 const { pullRepo } = require("./controllers/pull");
 const { revertRepo } = require("./controllers/revert");
 
+const agent = new https.Agent({  
+  rejectUnauthorized: false
+});
+
 dotenv.config();
 
 yargs(hideBin(process.argv))
