@@ -69,54 +69,68 @@ yargs(hideBin(process.argv))
 
 // startServer function 
 function startServer() {
-    const app = express();
-    const port = process.env.PORT || 3000;
+    const express = require('express');
+const https = require('https');
+const fs = require('fs');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const { Server } = require('socket.io');
+const mainRouter = require('./path/to/your/router'); // Update with your actual router path
 
-    app.use(bodyParser.json());
-    app.use(express.json());
+const app = express();
+const port = process.env.PORT || 3002;
 
-    const mongoURI = process.env.MONGODB_URI;
+// Load SSL certificates
+const options = {
+    key: fs.readFileSync('/home/ec2-user/aws-backend-demo/ssl.key'),   // Path to your SSL key
+    cert: fs.readFileSync('/home/ec2-user/aws-backend-demo/ssl.crt'),  // Path to your SSL certificate
+};
 
-    mongoose.connect(mongoURI).then(() => console.log("MongoDB connected!")).catch((err) => console.error("Unable to connect: ", err));
+// Middleware
+app.use(bodyParser.json());
+app.use(express.json());
+app.use(cors({ origin: "*" }));
 
-    app.use(cors({ origin: "*" }));
+// MongoDB connection
+const mongoURI = process.env.MONGODB_URI;
+mongoose.connect(mongoURI)
+    .then(() => console.log("MongoDB connected!"))
+    .catch((err) => console.error("Unable to connect: ", err));
 
-    app.use("/", mainRouter);
+// Route handling
+app.use("/", mainRouter);
 
-    let user = "test";
+// Socket.io connection handling
+let user = "test";
+const httpServer = https.createServer(options, app); // Use HTTPS server instead of HTTP
+const io = new Server(httpServer, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+    }
+});
 
-    // Load SSL certificate and key
-    const options = {
-        key: fs.readFileSync('ssl.key'), // path to your ssl.key
-        cert: fs.readFileSync('ssl.crt') // path to your ssl.crt
-    };
-
-    // Create HTTPS server
-    const httpsServer = https.createServer(options, app);
-    const io = new Server(httpsServer, {
-        cors: {
-            origin: "*",
-            methods: ["GET", "POST"],
-        }
+// Socket.io event handling
+io.on("connection", (socket) => {
+    socket.on("joinRoom", (userID) => {
+        user = userID;
+        console.log("====");
+        console.log(user);
+        console.log("=====");
+        socket.join(userID);
     });
+});
 
-    io.on("connection", (socket) => {
-        socket.on("joinRoom", (userID) => {
-            user = userID;
-            console.log("====");
-            console.log(user);
-            console.log("=====");
-            socket.join(userID);
-        });
-    });
+// MongoDB CRUD operations
+const db = mongoose.connection;
+db.once("open", async () => {
+    console.log("CRUD operations called");
+});
 
-    const db = mongoose.connection;
+// Start the HTTPS server
+httpServer.listen(port, () => {
+    console.log(`HTTPS Server is running on PORT ${port}`);
+});
 
-    db.once("open", async () => {
-        console.log("CRUD operations called");
-    });
-
-    httpsServer.listen(port, () => {
-        console.log(`Server is running on PORT ${port}`);
-    });
 }
