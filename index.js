@@ -66,16 +66,26 @@ yargs(hideBin(process.argv))
 // startServer function 
 function startServer(){
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3002;
 
 app.use(bodyParser.json());
 app.use(express.json());
+
+const allowedOrigins = [
+    'https://main.dftpg4j3j5yw6.amplifyapp.com', // replace with your actual frontend domain
+    // Add other domains if needed
+];
+
+app.use(cors({
+    origin: allowedOrigins, // Specify the allowed origins
+    credentials: true, // If you need to pass cookies or authorization headers
+}));
 
 const mongoURI = process.env.MONGODB_URI;
 
 mongoose.connect(mongoURI).then(()=>console.log("MongoDB connected!")).catch((err)=>console.error("Unable to connect : ", err));
 
-app.use(cors({origin: "*"}));
+
 
 
 app.use("/", mainRouter);
