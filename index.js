@@ -83,7 +83,15 @@ const options = {
 // Middleware
 app.use(bodyParser.json());
 app.use(express.json());
-app.use(cors({ origin: "*" }));
+const allowedOrigins = [
+    'https://main.dftpg4j3j5yw6.amplifyapp.com', // replace with your actual frontend domain
+    // Add other domains if needed
+];
+
+app.use(cors({
+    origin: allowedOrigins, // Specify the allowed origins
+    credentials: true, // If you need to pass cookies or authorization headers
+}));
 
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI;
