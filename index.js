@@ -69,14 +69,7 @@ yargs(hideBin(process.argv))
 
 // startServer function 
 function startServer() {
-    const express = require('express');
-const https = require('https');
-const fs = require('fs');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const { Server } = require('socket.io');
-const mainRouter = require('./path/to/your/router'); // Update with your actual router path
+   
 
 const app = express();
 const port = process.env.PORT || 3002;
