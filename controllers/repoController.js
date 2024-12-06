@@ -34,7 +34,7 @@ res.status(201).json({
    }catch(err) {
       // Handle duplicate name error
       if (err.code === 11000 && err.keyValue && err.keyValue.name) {
-          return res.status(400).json({ err: `Repository name "${err.keyValue.name}" already exists. Please choose a unique name.` });
+          return res.status(400).json({ err: `Repository name already exists` });
       }
 
       // Catch-all for other errors
