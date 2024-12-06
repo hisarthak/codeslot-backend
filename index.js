@@ -71,15 +71,7 @@ const port = process.env.PORT || 3002;
 app.use(bodyParser.json());
 app.use(express.json());
 
-const allowedOrigins = [
-    'https://main.dftpg4j3j5yw6.amplifyapp.com', // replace with your actual frontend domain
-    // Add other domains if needed
-];
-
-app.use(cors({
-    origin: allowedOrigins, // Specify the allowed origins
-    credentials: true, // If you need to pass cookies or authorization headers
-}));
+app.use(cors({origin: "*", methods: "*"}));
 
 const mongoURI = process.env.MONGODB_URI;
 
