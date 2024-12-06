@@ -31,10 +31,18 @@ res.status(201).json({
     message: "Repository created!", repositoryID: result._id,
 });
 
-   }catch(err){
-    console.error("Error during repository creation : ", err.message);
-    res.status(500).send("Server error");
-   }
+   }catch(err) {
+      // Handle duplicate name error
+      if (err.code === 11000 && err.keyValue && err.keyValue.name) {
+          return res.status(400).json({ err: `Repository name "${err.keyValue.name}" already exists. Please choose a unique name.` });
+      }
+
+      // Catch-all for other errors
+      console.error("Error creating repository:", err);
+      return res.status(500).json({
+          err: "An unexpected error occurred. Please try again.",
+          details: err.message,
+      });}
 };
 
 async function getAllRepositories(req, res){
