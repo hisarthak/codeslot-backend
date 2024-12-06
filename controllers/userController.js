@@ -57,31 +57,41 @@ async function signup (req,res){
 };
 
 async function login(req, res) {
-    const {email, password  } = req.body;
-    try{
+    const { username, password } = req.body; // Replace email with username
+    try {
         await connectClient();
         const db = client.db("githubclone");
         const usersCollection = db.collection("users");
 
-        const user = await usersCollection.findOne({email});
-    if (!user){
-        return res.status(400).json({message: "Invalid credentials!"})
-    }
+        // Find the user by username instead of email
+        const user = await usersCollection.findOne({ username });
+        if (!user) {
+            return res.status(400).json({ message: "Invalid credentials!" });
+        }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if(!isMatch){
-        return res.status(400).json({message: "Invalid credentials!"})
-    }
+        // Compare the provided password with the hashed password in the database
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid credentials!" });
+        }
 
-    const token = jwt.sign({id:user._id}, process.env.JWT_SECRET_KEY, {expiresIn:"1h"})
+        // Check the request source (CLI or frontend)
+        const isCLI = req.headers['x-request-source'] === 'cli'; // Check if it's a CLI request
 
-    res.json({token: token, userId: user._id});
+        // Set different expiration times based on the source
+        const tokenExpiration = isCLI ? '30d' : '1h'; // 30 days for CLI, 1 hour for frontend
 
-    } catch(err){
-        console.error("Error during login : ", err.message);
+        // Generate a JWT token with the user's ID
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: tokenExpiration });
+
+        // Respond with the token and user ID
+        res.json({ token: token, userId: user._id });
+    } catch (err) {
+        console.error("Error during login: ", err.message);
         res.status(500).send("Server error!");
     }
 }
+
 
 async function getAllUsers (req,res){
     try{
