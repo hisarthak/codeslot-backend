@@ -105,7 +105,7 @@ res.json({message:"Repositories found!", repositories});
      console.error("Error during fetching user repositories : ", err.message);
      res.status(500).send("Server error");
     }
-}; 
+};
 
 async function updateRepositoryById(req, res){
   const {id} = req.params;
