@@ -31,11 +31,9 @@ const RepositorySchema = new Schema(
       },
     ],
   },
-  { collation: { locale: "en", strength: 2 } } // Collation to make the name field case-insensitive
 );
 
-// Create a unique index on the name field with collation to enforce case-insensitive uniqueness
-RepositorySchema.index({ name: 1 }, { unique: true, collation: { locale: "en", strength: 2 } });
+
 
 const Repository = mongoose.model("Repository", RepositorySchema);
 
