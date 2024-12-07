@@ -31,7 +31,7 @@ async function isLoggedIn() {
 }
 
 
-// Function to prompt user for email and password
+// Function to prompt user for username and password
 function promptLogin() {
     const rl = readline.createInterface({
       input: process.stdin,
@@ -39,12 +39,12 @@ function promptLogin() {
     });
   
     return new Promise((resolve, reject) => {
-      rl.question('Enter your email: ', (email) => {
+      rl.question('Enter your username: ', (username) => {
         rl.question('Enter your password: ', async (password) => {
           try {
             // Send login request to your backend
             const res = await axios.post("https://gitspace.duckdns.org:3002/login", {
-              email: email,
+              username: username,
               password: password,
             },{
                 headers: { 'x-request-source': 'cli' }  // Custom header to indicate CLI
@@ -55,6 +55,7 @@ function promptLogin() {
             const token = res.data.token;
             const userConfig = {
               token: token,
+              username: username,
             };
   
             // No need to log folder creation, only the config file

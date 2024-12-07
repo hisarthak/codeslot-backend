@@ -1,49 +1,80 @@
-const mongoose = require('mongoose');
+const mongoose = require ('mongoose');
 const Repository = require("../models/repoModel");
 const User = require("../models/userModel");
 const Issue = require("../models/issueModel");
+const axios = require('axios')
 
-async function createRepository(req, res){
-    const {owner, name, issues, content, description, visibility} = req.body;
+async function createRepository(req, res) {
+   const { owner, name, issues, content, description, visibility } = req.body;
 
-   try{
- if(!name){
-    return res.status(400).json({error:"Repository name is required!"});
- }
+   try {
+       // Normalize and trim repository name
+       let trimmedName = name.trim().replace(/\s+/g, ' '); // Removes extra spaces and ensures single spaces between words
 
- if(!mongoose.Types.ObjectId.isValid(owner)){
-    return res.status(400).json({error:"Invalid User ID!"});
+       if (!trimmedName) {
+           return res.status(400).json({ error: "Repository name is required!" });
+       }
 
- }
+        // Validate the repository name
+        const repoNameRegex = /^(?!-)[a-zA-Z0-9-_ ]*(?<!-)$/; // Ensures no hyphen at the start or end
+        const hasLetter = /[a-zA-Z]/.test(trimmedName); // Ensures at least one letter
 
- const newRepository = new Repository({
-    name, 
-    description, 
-    visibility,
-     owner, 
-     content, 
-     issues,
- });
+        if (!repoNameRegex.test(trimmedName) || !hasLetter) {
+            return res.status(400).json({
+                error: "Repository name must contain at least one letter, and hyphens cannot be at the start or end."
+            });
+        }
 
- const result = await newRepository.save();
+       // Fetch the username using the owner ID
+       let username;
+       try {
+           const response = await axios.get(`https://gitspace.duckdns.org:3002/userProfile/${owner}`);
+           username = response.data.username; // Set the username
+       } catch (err) {
+           console.error("Cannot fetch user details: ", err);
+           return res.status(500).json({ error: "Unable to fetch user details." });
+       }
 
-res.status(201).json({
-    message: "Repository created!", repositoryID: result._id,
-});
+       // Append the username to the trimmed repository name
+       trimmedName = `${username}/${trimmedName}`;
 
-   }catch(err) {
-      // Handle duplicate name error
-      if (err.code === 11000 && err.keyValue && err.keyValue.name) {
-          return res.status(400).json({ err: `Repository name already exists` });
-      }
+       if (!mongoose.Types.ObjectId.isValid(owner)) {
+           return res.status(400).json({ error: "Invalid User ID!" });
+       }
 
-      // Catch-all for other errors
-      console.error("Error creating repository:", err);
-      return res.status(500).json({
-          err: "An unexpected error occurred. Please try again.",
-          details: err.message,
-      });}
-};
+       // Create the new repository object
+       const newRepository = new Repository({
+           name: trimmedName,
+           description,
+           visibility,
+           owner,
+           content,
+           issues,
+       });
+
+       // Save the repository
+       const result = await newRepository.save();
+
+       res.status(201).json({
+           message: "Repository created!",
+           repositoryID: result._id,
+       });
+   } catch (err) {
+       // Handle duplicate name error
+       if (err.code === 11000 && err.keyValue && err.keyValue.name) {
+           return res.status(400).json({ err: `Repository name already exists` });
+       }
+
+       // Catch-all for other errors
+       console.error("Error creating repository:", err);
+       return res.status(500).json({
+           err: "An unexpected error occurred. Please try again.",
+           details: err.message,
+       });
+   }
+}
+
+
 
 async function getAllRepositories(req, res){
    try{
