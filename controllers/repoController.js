@@ -2,7 +2,10 @@ const mongoose = require ('mongoose');
 const Repository = require("../models/repoModel");
 const User = require("../models/userModel");
 const Issue = require("../models/issueModel");
-const axios = require('axios')
+const axios = require('axios');
+require('dotenv').config();
+const apiUrl = process.env.API_URL;
+
 
 async function createRepository(req, res) {
    const { owner, name, issues, content, description, visibility } = req.body;
@@ -28,7 +31,7 @@ async function createRepository(req, res) {
        // Fetch the username using the owner ID
        let username;
        try {
-           const response = await axios.get(`https://gitspace.duckdns.org:3002/userProfile/${owner}`);
+           const response = await axios.get(`https://${apiUrl}/userProfile/${owner}`);
            username = response.data.username; // Set the username
        } catch (err) {
            console.error("Cannot fetch user details: ", err);

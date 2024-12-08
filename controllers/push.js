@@ -4,6 +4,8 @@ const readline = require('readline');
 const jwt = require('jsonwebtoken');
 const { s3, S3_BUCKET } = require("../config/aws-config");
 const axios = require('axios');
+require('dotenv').config();
+const apiUrl = process.env.API_URL;
 
 // Helper function to check if the user is logged in (checks the .myGit/config.json)
 async function isLoggedIn() {
@@ -43,7 +45,7 @@ function promptLogin() {
         rl.question('Enter your password: ', async (password) => {
           try {
             // Send login request to your backend
-            const res = await axios.post("https://gitspace.duckdns.org:3002/login", {
+            const res = await axios.post(`https://${apiUrl}/login`, {
               username: username,
               password: password,
             },{
