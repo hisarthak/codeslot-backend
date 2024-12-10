@@ -1,0 +1,12 @@
+.env
+node_modules/
+package-lock.json
+.git
+config/
+controllers/
+middleware/
+models/
+routes/
+.gitignore
+package-lock.json
+

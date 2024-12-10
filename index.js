@@ -26,7 +26,7 @@ const yargs = require('yargs');
 const { hideBin } = require("yargs/helpers");
 
 const { initRepo } = require("./controllers/init.js");
-const { addFileToRepo, addModifiedOrNewLogs } = require("./controllers/addController");
+const { addFileToRepo, addModifiedOrLogs } = require("./controllers/addController");
 const { commitRepo } = require("./controllers/commit.js");
 const { pushRepo } = require("./controllers/push");
 const { pullRepo } = require("./controllers/pull");
@@ -43,7 +43,6 @@ dotenv.config();
 yargs(hideBin(process.argv))
 .command("start", "Start a new server", {}, startServer)
 .command("init", "Initialise a new repository", {}, initRepo)
-yargs(hideBin(process.argv))
   .command(
     "add <file>",
     "Add a file or all modified/new PM2 logs to the repository",
@@ -55,7 +54,7 @@ yargs(hideBin(process.argv))
     },
     async (argv) => {
       if (argv.file === ".") {
-        await addModifiedOrNewLogs(); // Add all PM2 log files
+        await addModifiedOrLogs(); 
       } else {
         await addFileToRepo(argv.file); // Add a specific file
       }
