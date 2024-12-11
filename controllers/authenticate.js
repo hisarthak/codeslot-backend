@@ -15,6 +15,7 @@ function authenticateUser() {
 
     return new Promise((resolve, reject) => {
         console.log("Authentication will be valid for 30 days.");
+        
         rl.question("Enter your username: ", (username) => {
             rl.question("Enter your password: ", async (password) => {
                 try {

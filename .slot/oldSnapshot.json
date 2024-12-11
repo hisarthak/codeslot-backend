@@ -102,7 +102,7 @@
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\index": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxpbmRleA==",
     "name": "index",
-    "hash": "4fe660939700e56896a8343cb2b7f4d49e868d19ba48ba2e03b4e44cb1a0f8ce"
+    "hash": "f6a63bf4926dec1bfabda8b6048773d1c1946be3eacedfb60842d511cc7ce3eb"
   },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\info\\exclude": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxpbmZvXGV4Y2x1ZGU=",
@@ -713,6 +713,11 @@
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDA2XDE2NjA3N2JlNGQxZjYyMGQ4OWI5ZWIzM2M3NmQ4OWU3NTg1N2Rh",
     "name": "166077be4d1f620d89b9eb33c76d89e75857da",
     "hash": "1914ecae462a0d3eeb48e1007fd7f29b390413a70dd62d0c9b4a07dcb46ea1e7"
+  },
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\06\\37a088a01e8ddab3bf3fa98dbe804cbde1a0dc": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDA2XDM3YTA4OGEwMWU4ZGRhYjNiZjNmYTk4ZGJlODA0Y2JkZTFhMGRj",
+    "name": "37a088a01e8ddab3bf3fa98dbe804cbde1a0dc",
+    "hash": "d596f56b4ab387e9dcc8c299f625cd656a871455a3295cb5fec80a87be595c4c"
   },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\06\\645f5577e370d247f5991ac9a6599bfd8de501": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDA2XDY0NWY1NTc3ZTM3MGQyNDdmNTk5MWFjOWE2NTk5YmZkOGRlNTAx",
@@ -1693,6 +1698,11 @@
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDBmXGUxZWVkZTI5YjI4N2YyYzQ2ZTUzNzMzOTViMTkwOTBlOTUwM2I4",
     "name": "e1eede29b287f2c46e5373395b19090e9503b8",
     "hash": "af06dd50a53e8090c8895c1ed4ef5b5b6f35b44aecd95321f4473aedda45ce77"
+  },
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\0f\\e2fa50e8e79f56b23267be86bde68d6f86195b": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDBmXGUyZmE1MGU4ZTc5ZjU2YjIzMjY3YmU4NmJkZTY4ZDZmODYxOTVi",
+    "name": "e2fa50e8e79f56b23267be86bde68d6f86195b",
+    "hash": "273aa0d4b58e842ee3aaf2f955b09e41c00c0e18bc91a42c6083392e221e72ce"
   },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\0f\\ea1ef434ae555b7cdb80deca792c6025c36262": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDBmXGVhMWVmNDM0YWU1NTViN2NkYjgwZGVjYTc5MmM2MDI1YzM2MjYy",
@@ -3604,6 +3614,11 @@
     "name": "c2217f1b4a8876edfc47be4261caa9bf808529",
     "hash": "de8fe8e15651ba6309ad05d8f72289d3c08b6d3dcf82b9bdea97c012af40cb9f"
   },
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\23\\d0b271afef69b9877340bc23b59272e891ea82": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDIzXGQwYjI3MWFmZWY2OWI5ODc3MzQwYmMyM2I1OTI3MmU4OTFlYTgy",
+    "name": "d0b271afef69b9877340bc23b59272e891ea82",
+    "hash": "57c4694e852b89a04d45772983d6cb5eba339ae07f891f30b1b83e23ff09f839"
+  },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\23\\e2b35d33bc186ab7c4b03d582448200a42f20f": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDIzXGUyYjM1ZDMzYmMxODZhYjdjNGIwM2Q1ODI0NDgyMDBhNDJmMjBm",
     "name": "e2b35d33bc186ab7c4b03d582448200a42f20f",
@@ -3883,6 +3898,11 @@
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDI2XDZlZWVjNWI5NDQ1ZjQ0MGM1ODFiMGVmM2NlNzYzOTNiNDliNWFl",
     "name": "6eeec5b9445f440c581b0ef3ce76393b49b5ae",
     "hash": "85bdf9d9f944d4d82cfcc4f3cc42a1baa3f6f0cd95b6abbd4782cbcdc395bade"
+  },
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\26\\87d1b67d3bd2c6d33b582c3f5953c835d6ef32": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDI2XDg3ZDFiNjdkM2JkMmM2ZDMzYjU4MmMzZjU5NTNjODM1ZDZlZjMy",
+    "name": "87d1b67d3bd2c6d33b582c3f5953c835d6ef32",
+    "hash": "258650a7f5a6dec1017c3ebec44fb293a9c3c1116ebb4fdbe12c92e38d878ac2"
   },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\26\\983801158c9e933bd5961d67b145564dcf7313": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDI2XDk4MzgwMTE1OGM5ZTkzM2JkNTk2MWQ2N2IxNDU1NjRkY2Y3MzEz",
@@ -4488,6 +4508,11 @@
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDJkXGQ5NzU3MzAwNWJmNTE3YzM1N2I1MjA3NjQwYzM4NDZkYzViMmFh",
     "name": "d97573005bf517c357b5207640c3846dc5b2aa",
     "hash": "49c7f33a1a456b4d7aaadde36bbd3347b874adde7d3e29c978d03d2003896d6c"
+  },
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\2d\\eba467bbfb518e5b2ddf0333b0c1359cf2a979": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDJkXGViYTQ2N2JiZmI1MThlNWIyZGRmMDMzM2IwYzEzNTljZjJhOTc5",
+    "name": "eba467bbfb518e5b2ddf0333b0c1359cf2a979",
+    "hash": "9fde4b51b9c3e3886e5a5546e62d742bb94cca6c7d5a386fce8ee668246140a4"
   },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\2d\\f37736bf514c4a513225528465de5ef3be8d44": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDJkXGYzNzczNmJmNTE0YzRhNTEzMjI1NTI4NDY1ZGU1ZWYzYmU4ZDQ0",
@@ -6093,6 +6118,11 @@
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDNmXDI2MTQ4NDg5NTcwYzUwY2Y3Yzg0YzI2OTMzM2Y1NzUyYWRiODRi",
     "name": "26148489570c50cf7c84c269333f5752adb84b",
     "hash": "0f42d1ac3aca1fe9d190e2e36c6987f96df17ca5f1460df3bd30dfe021c1c769"
+  },
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\3f\\2a76170a05740484294599d34477b39c43c039": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDNmXDJhNzYxNzBhMDU3NDA0ODQyOTQ1OTlkMzQ0NzdiMzljNDNjMDM5",
+    "name": "2a76170a05740484294599d34477b39c43c039",
+    "hash": "01dde3ec8bb9aad1223eb562a6bb82ae1b786b2211e889cad12950a2ba79343a"
   },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\3f\\2d290acf4872680bdfe4cf0f8a85cba15214a5": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDNmXDJkMjkwYWNmNDg3MjY4MGJkZmU0Y2YwZjhhODVjYmExNTIxNGE1",
@@ -9759,6 +9789,11 @@
     "name": "9bdcebab847a76072fdf8f1e8db556dbc7f2e4",
     "hash": "54da2826515453fac589694dbce0a35fdb73480bbe7185c1123469d246f1092a"
   },
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\63\\a391542d1182ba989ce1a2b1dbe90e4b650150": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDYzXGEzOTE1NDJkMTE4MmJhOTg5Y2UxYTJiMWRiZTkwZTRiNjUwMTUw",
+    "name": "a391542d1182ba989ce1a2b1dbe90e4b650150",
+    "hash": "59fd139c9d3d6131a825e08cd33a2e03f58e3a0469e330bee3d0584560dabdfc"
+  },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\63\\aa4add4f956ae42f05b91064bf37745384507b": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDYzXGFhNGFkZDRmOTU2YWU0MmYwNWI5MTA2NGJmMzc3NDUzODQ1MDdi",
     "name": "aa4add4f956ae42f05b91064bf37745384507b",
@@ -11379,6 +11414,11 @@
     "name": "6391ae3b5aec8aaa8eaeb22f1b134af29249ef",
     "hash": "168e0dda40a8b3cd7690149415e8c48052760321ba19b15def28538e525f5a3e"
   },
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\74\\63afc2420dd25cc35a1ada56805e30bace768f": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDc0XDYzYWZjMjQyMGRkMjVjYzM1YTFhZGE1NjgwNWUzMGJhY2U3Njhm",
+    "name": "63afc2420dd25cc35a1ada56805e30bace768f",
+    "hash": "f7aa447bab0965fbc9742f5acf71dd79f108262a3e53b2ec1ad4109d2d01db55"
+  },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\74\\6a9288c5df44011653883426d97a46fa62fd7e": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDc0XDZhOTI4OGM1ZGY0NDAxMTY1Mzg4MzQyNmQ5N2E0NmZhNjJmZDdl",
     "name": "6a9288c5df44011653883426d97a46fa62fd7e",
@@ -11483,6 +11523,11 @@
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDc1XGI0MWE1MzYyNjdmNTY3NDA2ZTc5OGU0ZDJlYWNiYmFkMmIwNjg5",
     "name": "b41a536267f567406e798e4d2eacbbad2b0689",
     "hash": "a612079f21091459877dc10bc9d6e3061aa4f06d88fa0e04ef7a5788101ed336"
+  },
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\75\\c99a4627f6b2e771afdeda60acc4387af1fe8c": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDc1XGM5OWE0NjI3ZjZiMmU3NzFhZmRlZGE2MGFjYzQzODdhZjFmZThj",
+    "name": "c99a4627f6b2e771afdeda60acc4387af1fe8c",
+    "hash": "0e526cbac307141fff49a9625b9c6a00c9b0273ca0cf62bf3a66a8db1c90f696"
   },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\75\\cc9f4593fe54c34f6391166c8a5466d4c3d3a9": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXDc1XGNjOWY0NTkzZmU1NGMzNGY2MzkxMTY2YzhhNTQ2NmQ0YzNkM2E5",
@@ -16949,6 +16994,11 @@
     "name": "ff15b2f4522118503a0460222083bd26773317",
     "hash": "f352b3cd29f4899e9a59d790f434ae344bd390780b941f8944367937379bcc6f"
   },
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\b0\\01b560cbdc81489a5df3f643b038fe1e4920d6": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXGIwXDAxYjU2MGNiZGM4MTQ4OWE1ZGYzZjY0M2IwMzhmZTFlNDkyMGQ2",
+    "name": "01b560cbdc81489a5df3f643b038fe1e4920d6",
+    "hash": "60d3d2060f057cf82dd9abc1e3f7d49d208ff053f684dca8dcf0d0bd34ea0ae1"
+  },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\b0\\13b4fcddf2b40f9a78e1daec295c156b8432fb": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXGIwXDEzYjRmY2RkZjJiNDBmOWE3OGUxZGFlYzI5NWMxNTZiODQzMmZi",
     "name": "13b4fcddf2b40f9a78e1daec295c156b8432fb",
@@ -22034,6 +22084,11 @@
     "name": "a3f185e741f2e58dc0905b407bc82c7e7fdd56",
     "hash": "73318dab1d978597f15fc92d2fd3ed36ea6113630ebed72c163205a6f9ec23fa"
   },
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\e4\\ac74d5f6c431fce64d8454eb0eba4f0918074f": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXGU0XGFjNzRkNWY2YzQzMWZjZTY0ZDg0NTRlYjBlYmE0ZjA5MTgwNzRm",
+    "name": "ac74d5f6c431fce64d8454eb0eba4f0918074f",
+    "hash": "b403131ecc017c819ba38ce76e79c4c1288b9b9789e651e7846fec4d2f86c4da"
+  },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\e4\\bbf3cbc56cdc9335c67b02b8a62e980434dc74": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXGU0XGJiZjNjYmM1NmNkYzkzMzVjNjdiMDJiOGE2MmU5ODA0MzRkYzc0",
     "name": "bbf3cbc56cdc9335c67b02b8a62e980434dc74",
@@ -22243,6 +22298,11 @@
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXGU2XGNhM2NhZDVlYzVhYzE4N2NmMmFlZDM3MGZkMWJhMGZmZjJmYmRj",
     "name": "ca3cad5ec5ac187cf2aed370fd1ba0fff2fbdc",
     "hash": "1587bd967aa909d54e4bb0ebbaab9f0cd9affa26203ab970363f7a8397495778"
+  },
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\e6\\f70c5058acf404c2f8cfc4a5f89fe4397521ff": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXGU2XGY3MGM1MDU4YWNmNDA0YzJmOGNmYzRhNWY4OWZlNDM5NzUyMWZm",
+    "name": "f70c5058acf404c2f8cfc4a5f89fe4397521ff",
+    "hash": "99eb9fb078bf22cce56ad9dc2f386f8476d3d7bfb1f371b07ca2eb4342a33ae5"
   },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\e6\\fccbeb39841ba513624ed0b6ade69958fd1b63": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXGU2XGZjY2JlYjM5ODQxYmE1MTM2MjRlZDBiNmFkZTY5OTU4ZmQxYjYz",
@@ -22493,6 +22553,11 @@
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXGU5XDBlMDZiNzQzZTU4MDI5YjZlZmM2MGEzZDUyMTlmYTEyNmJiYjAy",
     "name": "0e06b743e58029b6efc60a3d5219fa126bbb02",
     "hash": "e5f25cbd87d43537b06b16b3569863ddda3e45b3e08fc59784144d276fb41701"
+  },
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\e9\\17183357c4fd541321cc8b1bdc1d5ee150a1b9": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXGU5XDE3MTgzMzU3YzRmZDU0MTMyMWNjOGIxYmRjMWQ1ZWUxNTBhMWI5",
+    "name": "17183357c4fd541321cc8b1bdc1d5ee150a1b9",
+    "hash": "ec72a4ee3fba482c01f4e9da5cc53771ddcdc3f3362d69b55953f46f475b9251"
   },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\.git\\objects\\e9\\3f6da6451ffcc3d85100b46ef367385ce95894": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdFxvYmplY3RzXGU5XDNmNmRhNjQ1MWZmY2MzZDg1MTAwYjQ2ZWYzNjczODVjZTk1ODk0",
@@ -24892,7 +24957,7 @@
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\controllers\\addController.js": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcY29udHJvbGxlcnNcYWRkQ29udHJvbGxlci5qcw==",
     "name": "addController.js",
-    "hash": "f612e1deac0a19a879150a04959be281170c4165c8152b746979afa47a3c6179"
+    "hash": "4bea106db4abc579e7d31e863b53e0555dccdcda8df2a27c8620ed0fe911d82e"
   },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\controllers\\authenticate.js": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcY29udHJvbGxlcnNcYXV0aGVudGljYXRlLmpz",
@@ -24954,20 +25019,10 @@
     "name": "fullchain.pem",
     "hash": "09d0b774bb5905401575e35403d58c99840538f15829d888723fb4cd8612040a"
   },
-  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\hello.txt": {
-    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcaGVsbG8udHh0",
-    "name": "hello.txt",
-    "hash": "950b838ac630ffa4af8037a4b06c59c50f4b7d59bef9deced78264efe0e04f6a"
-  },
-  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\Hello2.txt": {
-    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcSGVsbG8yLnR4dA==",
-    "name": "Hello2.txt",
-    "hash": "f51e8c600ccb94853888a57fe467f8ae86984c931b0f85e3e8714e74566f6ab9"
-  },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\index.js": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcaW5kZXguanM=",
     "name": "index.js",
-    "hash": "ab7abe6974b451c36f423f113abdce59f817fabbfc43ddf2b6fe3362d1e5ea0d"
+    "hash": "6c6536752ac93a34ce4d3124ae9bcc6861337bf5534005ac8d9591bbafa52d09"
   },
   "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\middleware\\authMiddleware.js": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcbWlkZGxld2FyZVxhdXRoTWlkZGxld2FyZS5qcw==",
@@ -52424,30 +52479,25 @@
     "name": "user.router.js",
     "hash": "9f20de69bc9870156a3b1a98e36ec8e99a8107f2a4b7d58a3caf0cd5b6c40083"
   },
-  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\shutdown.bat": {
-    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcc2h1dGRvd24uYmF0",
-    "name": "shutdown.bat",
-    "hash": "62643608cfb89bfd457a1ae09efa3ff36bad84ab5c325a547b6799d414a18b7a"
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\utils\\ignoreUtils.js": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcdXRpbHNcaWdub3JlVXRpbHMuanM=",
+    "name": "ignoreUtils.js",
+    "hash": "942c5f2521fbe52b6b6b13a99f03d74b965cc7e4ae5684be0e76a77906ebd319"
   },
-  ".env": {
-    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmVudg==",
-    "name": ".env",
-    "hash": "cc6f3667b5133b04d92161ee8d1984be1add5657d1958b021ac3f23d31a1d265"
-  },
-  ".gitignore": {
-    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLmdpdGlnbm9yZQ==",
-    "name": ".gitignore",
-    "hash": "6c45b240181df425ae013f3c9668c36b2c557d0b8028133774ad0a2e18a22e8c"
+  "C:\\Users\\lenovo\\Desktop\\Projects\\GitHub\\Backend\\utils\\snapshotUtils.js": {
+    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcdXRpbHNcc25hcHNob3RVdGlscy5qcw==",
+    "name": "snapshotUtils.js",
+    "hash": "555585d4136f5b6977ab75d7fbae49cb226769c97c53adea1090de0dcceda29d"
   },
   ".slotignore": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcLnNsb3RpZ25vcmU=",
     "name": ".slotignore",
-    "hash": "d4543da45d9b9071910facc2b5c00359418ff1773efbb6fa707249448aa97966"
+    "hash": "d8a888e22e7dae6d103a0ff3403bb45a0055bef7335ed59a4c725ab566322aba"
   },
   "A": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcQQ==",
     "name": "A",
-    "hash": "8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4"
+    "hash": "df103b54b5632163114d83b7d24b3f092c5a8eda7e2b79958bf7eb93d14c338a"
   },
   "B": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcQg==",
@@ -52458,21 +52508,6 @@
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcZnVsbGNoYWluLnBlbQ==",
     "name": "fullchain.pem",
     "hash": "09d0b774bb5905401575e35403d58c99840538f15829d888723fb4cd8612040a"
-  },
-  "index.js": {
-    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcaW5kZXguanM=",
-    "name": "index.js",
-    "hash": "6c6536752ac93a34ce4d3124ae9bcc6861337bf5534005ac8d9591bbafa52d09"
-  },
-  "package-lock.json": {
-    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRccGFja2FnZS1sb2NrLmpzb24=",
-    "name": "package-lock.json",
-    "hash": "a16208c36d0de89310b6c06c05a69d1a5790eab9323d93251678ebfd7b709a2f"
-  },
-  "package.json": {
-    "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRccGFja2FnZS5qc29u",
-    "name": "package.json",
-    "hash": "daa0061ed891373ac0c25e5ad5e46bb67f69f703486710325581b7bc47006617"
   },
   "Physics.txt": {
     "id": "QzpcVXNlcnNcbGVub3ZvXERlc2t0b3BcUHJvamVjdHNcR2l0SHViXEJhY2tlbmRcUGh5c2ljcy50eHQ=",

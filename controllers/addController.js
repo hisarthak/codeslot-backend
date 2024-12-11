@@ -51,14 +51,17 @@ async function addFileToRepo(file) {
   try {
     const ignorePatterns = await loadSlotIgnore(slotIgnoreFile);  // Load the ignore patterns
 
-    // Skip the file if it's in the ignore list
-    if (await isFileIgnored(filePath, ignorePatterns)) {
+
+
+    const filePath = path.resolve(process.cwd(), file);
+
+     // Skip the file if it's in the ignore list
+     if (await isFileIgnored(filePath, ignorePatterns)) {
       console.log(`${file} is ignored due to .slotignore.`);
       return; // Skip this file
     }
-    const snapshot = JSON.parse(await fs.readFile(snapshotFile, "utf-8"));
 
-    const filePath = path.resolve(process.cwd(), file);
+    const snapshot = JSON.parse(await fs.readFile(snapshotFile, "utf-8"));
     const fileHash = await calculateFileHash(filePath);
     const uniqueId = generateUniqueId(filePath);  // Generate a unique ID based on the file's path
 
@@ -103,8 +106,6 @@ async function addFileToRepo(file) {
     console.error("Error adding file to repo", err);
   }
 }
-
-// Function to add all modified or new files
 async function addModifiedOrLogs() {
   const slotIgnoreFile = path.join(process.cwd(), ".slotignore");
   const repoPath = path.resolve(process.cwd(), ".slot");
@@ -113,12 +114,6 @@ async function addModifiedOrLogs() {
 
   try {
     const ignorePatterns = await loadSlotIgnore(slotIgnoreFile);  // Load the ignore patterns
-
-    // Skip the file if it's in the ignore list
-    if (await isFileIgnored(filePath, ignorePatterns)) {
-      console.log(`${file} is ignored due to .slotignore.`);
-      return; // Skip this file
-    }
     const snapshot = JSON.parse(await fs.readFile(snapshotFile, "utf-8"));
     const filesInDir = await fs.readdir(process.cwd());
 
@@ -129,6 +124,12 @@ async function addModifiedOrLogs() {
       // Skip directories and .slot folder
       if ((await fs.stat(filePath)).isDirectory() || file === ".slot") {
         continue;
+      }
+
+      // Skip the file if it's in the ignore list
+      if (await isFileIgnored(filePath, ignorePatterns)) {
+        console.log(`${file} is ignored due to .slotignore.`);
+        continue; // Skip this file
       }
 
       const fileHash = await calculateFileHash(filePath);
@@ -175,5 +176,6 @@ async function addModifiedOrLogs() {
     console.error("Error adding files to repo", err);
   }
 }
+
 
 module.exports = { addFileToRepo, addModifiedOrLogs };
