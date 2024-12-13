@@ -16,10 +16,11 @@ async function commitRepo(message) {
     return;
   }
 
-  const repoPath = path.resolve(process.cwd(), ".myGit");
+  const repoPath = path.resolve(process.cwd(), ".slot");
   const stagedPath = path.join(repoPath, "staging");
   const commitPath = path.join(repoPath, "commits");
   const commitLogPath = path.join(repoPath, "commitLogs.json"); // Explicit .json extension
+  const oldSnapshotPath = path.join(repoPath, "oldSnapshot.json");
 
   try {
     // Generate a unique commit ID
@@ -29,13 +30,19 @@ async function commitRepo(message) {
     const commitDir = path.join(commitPath, commitID);
     await fs.mkdir(commitDir, { recursive: true });
 
-    // Copy files from staging to the commit directory
-    const files = await fs.readdir(stagedPath);
-    for (const file of files) {
-      await fs.copyFile(
-        path.join(stagedPath, file),
-        path.join(commitDir, file)
-      );
+    // Copy files and directories from staging to the commit directory
+    const items = await fs.readdir(stagedPath);
+    for (const item of items) {
+      const itemPath = path.join(stagedPath, item);
+      const stats = await fs.stat(itemPath);
+
+      if (stats.isDirectory()) {
+        // Handle directories: use fs.cp (Node.js v16.7.0+)
+        await fs.cp(itemPath, path.join(commitDir, item), { recursive: true });
+      } else if (stats.isFile()) {
+        // Handle files: use fs.copyFile
+        await fs.copyFile(itemPath, path.join(commitDir, item));
+      }
     }
 
     // Save commit metadata
@@ -48,6 +55,50 @@ async function commitRepo(message) {
       path.join(commitDir, "commit.json"),
       JSON.stringify(commitMetadata, null, 2)
     );
+
+    // Create commitData.json and copy oldSnapshot.json contents
+    const commitDataPath = path.join(commitDir, "commitData.json");
+
+    try {
+      const oldSnapshot = JSON.parse(await fs.readFile(oldSnapshotPath, "utf8"));
+
+      for (const [relativePath, data] of Object.entries(oldSnapshot)) {
+        if (data.change === true || data.new === true) {
+          oldSnapshot[relativePath] = {
+            ...data,
+            commit_id: commitID,
+            message: trimmedMessage,
+            date: commitMetadata.date,
+          };
+        }
+      }
+
+      // Write the updated snapshot data to commitData.json
+      await fs.writeFile(
+        commitDataPath,
+        JSON.stringify(oldSnapshot, null, 2),
+        "utf8"
+      );
+
+      // After committing, reset the 'change' and 'new' flags to false
+      for (const [relativePath, data] of Object.entries(oldSnapshot)) {
+        data.change = false;
+        data.new = false;
+      }
+
+      // Write the updated oldSnapshot back to the file
+      await fs.writeFile(
+        oldSnapshotPath,
+        JSON.stringify(oldSnapshot, null, 2),
+        "utf8"
+      );
+    } catch (err) {
+      if (err.code === "ENOENT") {
+        console.warn("Warning: oldSnapshot.json does not exist.");
+      } else {
+        throw err;
+      }
+    }
 
     console.log(`Commit ${commitID} created with message: "${trimmedMessage}"`);
 

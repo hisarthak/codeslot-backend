@@ -29,12 +29,12 @@ async function initRepo() {
     await fs.writeFile(newSnapshotFile, JSON.stringify({}));
 
     // Create the .slotignore file outside the .slot folder
-    const slotIgnoreContent = `.env\nnode_modules/\npackage-lock.json\n.git\n`;
+    const slotIgnoreContent = `.env\nnode_modules\npackage-lock.json\n.git\n`;
     await fs.writeFile(slotIgnoreFile, slotIgnoreContent);
 
-    // Take snapshots of all files in the directory and subdirectories
+    // Take snapshots of all files and folders in the directory
     const snapshot = {};
-    await captureFilesSnapshot(process.cwd(), snapshot);
+    await captureFilesSnapshot(process.cwd(), snapshot, process.cwd());
 
     // Save the snapshot in the oldSnapshot.json
     await fs.writeFile(oldSnapshotFile, JSON.stringify(snapshot, null, 2));
@@ -45,44 +45,55 @@ async function initRepo() {
   }
 }
 
-// Function to recursively capture file snapshots in a given directory
-async function captureFilesSnapshot(dir, snapshot) {
-  const files = await fs.readdir(dir);
+// Function to recursively capture file and folder snapshots in a given directory
+async function captureFilesSnapshot(dir, snapshot, repoRoot) {
+  const entries = await fs.readdir(dir, { withFileTypes: true });
 
-  // Iterate over all the files and directories in the current directory
-  for (let file of files) {
-    const filePath = path.join(dir, file);
-    const fileStats = await fs.stat(filePath);
+  // Iterate over all entries (files and directories) in the current directory
+  for (const entry of entries) {
+    const entryPath = path.join(dir, entry.name);
+    const relativePath = path.relative(repoRoot, entryPath);
 
-    if (fileStats.isDirectory()) {
-      // If it's a directory, recurse into the subdirectory
-      await captureFilesSnapshot(filePath, snapshot);
-    } else if (fileStats.isFile()) {
-      // If it's a file, take a snapshot of it
-      const uniqueId = generateUniqueId(filePath);  // Generate unique ID based on path
-      const fileHash = await calculateFileHash(filePath);  // Calculate the hash of the file content
+    if (entry.isDirectory()) {
+      // Add directory to the snapshot with new fields
+      const inode = await getFileInode(entryPath);  // Get inode (unique file ID)
+      snapshot[relativePath] = {
+        ino: inode || "", // Store inode or empty string if unavailable
+        name: entry.name,  // Directory name
+        type: "folder",    // Explicitly set type as folder
+        message: "",       // New field: empty string
+        commit_id: "",     // New field: empty string
+        change: false,     // New field: false (no change initially)
+        time: "",
+      };
 
-      // Store file details in the snapshot
-      snapshot[filePath] = {
-        id: uniqueId,  // Unique ID based on path
-        name: file,    // File name
-        hash: fileHash // Hash of the file content (empty for now)
+      // Recurse into the subdirectory
+      await captureFilesSnapshot(entryPath, snapshot, repoRoot);
+    } else if (entry.isFile()) {
+      // Add file to the snapshot with new fields
+      const inode = await getFileInode(entryPath);  // Get inode (unique file ID)
+      snapshot[relativePath] = {
+        ino: inode || "", // Store inode or empty string if unavailable
+        name: entry.name,  // File name
+        type: "file",      // Explicitly set type as file
+        hash: "",          // Empty hash for now
+        message: "",       // New field: empty string
+        commit_id: "",     // New field: empty string
+        change: true, 
+        date : "",
       };
     }
   }
 }
 
-// Function to generate a unique ID based on file path
-function generateUniqueId(filePath) {
-  return Buffer.from(filePath).toString('base64');
-}
-
-// Function to calculate the hash of the file content
-async function calculateFileHash(filePath) {
-  const fileBuffer = await fs.readFile(filePath);  // Read the file content
-  const hash = crypto.createHash('sha256');         // Create a SHA-256 hash instance
-  hash.update(fileBuffer);                          // Update the hash with file content
-  return hash.digest('hex');                        // Return the hash as a hexadecimal string
+// Function to get the inode (unique file ID) of a file
+async function getFileInode(filePath) {
+  try {
+    const stats = await fs.stat(filePath);
+    return stats.ino; // Return inode if available
+  } catch (err) {
+    return null; // Return null if inode can't be retrieved (e.g., file doesn't exist)
+  }
 }
 
 module.exports = { initRepo };

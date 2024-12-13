@@ -10,6 +10,11 @@
     "start": "node index.js",
     "start-tracker": "node tracker/file-tracker.js"
   },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
   "author": "Sarthak Pandey",
   "license": "ISC",
   "keywords": ["version-control", "CLI", "slot"],
@@ -29,5 +34,9 @@
     "socket.io": "^4.8.0",
     "uuid": "^10.0.0",
     "yargs": "^17.7.2"
+  }, 
+   "devDependencies": {
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0"
   }
 }
