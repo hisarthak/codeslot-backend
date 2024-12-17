@@ -263,7 +263,7 @@ async function fetchAndProcessCommitDataFromS3(repoName, commitID) {
 // Route to handle requests for file system generation
 async function repoFolderStructure(req, res) {
   try {
-    const { repoName } = req.params; // Extract repoName from URL
+    const { reponame } = req.params; // Extract repoName from URL
     const decodedRepoName = decodeURIComponent(repoName); // Decode URL-encoded repoName
     console.log(repoName);
     console.log(decodedRepoName);
