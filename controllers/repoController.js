@@ -265,6 +265,8 @@ async function repoFolderStructure(req, res) {
   try {
     const { repoName } = req.params; // Extract repoName from URL
     const decodedRepoName = decodeURIComponent(repoName); // Decode URL-encoded repoName
+    console.log(repoName);
+    console.log(decodedRepoName);
 
     // Step 1: Fetch the commit ID with the highest count from logs.json
     const commitID = await getHighestCountCommitFromS3(decodedRepoName);
