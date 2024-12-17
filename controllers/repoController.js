@@ -1,5 +1,6 @@
 const mongoose = require ('mongoose');
 const Repository = require("../models/repoModel");
+
 const User = require("../models/userModel");
 const Issue = require("../models/issueModel");
 const axios = require('axios');
@@ -7,6 +8,7 @@ const { s3, S3_BUCKET } = require("../config/aws-config");
 const path = require('path');
 const dotenv = require("dotenv");
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
+process.env.AWS_SDK_LOAD_CONFIG = "1";
 const apiUrl = process.env.API_URL;
 
 
