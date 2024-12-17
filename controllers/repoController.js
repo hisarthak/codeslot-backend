@@ -264,8 +264,8 @@ async function fetchAndProcessCommitDataFromS3(repoName, commitID) {
 async function repoFolderStructure(req, res) {
   try {
     const { reponame } = req.params; // Extract repoName from URL
-    const decodedRepoName = decodeURIComponent(repoName); // Decode URL-encoded repoName
-    console.log(repoName);
+    const decodedRepoName = decodeURIComponent(reponame); // Decode URL-encoded repoName
+    console.log(reponame);
     console.log(decodedRepoName);
 
     // Step 1: Fetch the commit ID with the highest count from logs.json
