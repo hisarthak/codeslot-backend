@@ -10,7 +10,6 @@ const axios = require('axios');
 const dotenv = require("dotenv");
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-const S3_BUCKETT = process.env.S3_BUCKET;
 
 
 
@@ -83,7 +82,7 @@ async function repoFolderStructure() {
     const commitDataJson = await fetchAndProcessCommitDataFromS3(repoName, commitID);
 
     // You can check the array contents here, or handle it further
-    console.log(commitDataArray); // Print the array with all the fetched commit data
+    // console.log(commitDataArray); // Print the array with all the fetched commit data
     // console.log(S3_BUCKETT);
 
   } catch (error) {

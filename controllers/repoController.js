@@ -5,6 +5,7 @@ const Issue = require("../models/issueModel");
 const axios = require('axios');
 const { s3, S3_BUCKET } = require("../config/aws-config");
 const path = require('path');
+const dotenv = require("dotenv");
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const apiUrl = process.env.API_URL;
 
