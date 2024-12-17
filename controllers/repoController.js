@@ -3,10 +3,9 @@ const Repository = require("../models/repoModel");
 const User = require("../models/userModel");
 const Issue = require("../models/issueModel");
 const axios = require('axios');
-require('dotenv').config();
 const { s3, S3_BUCKET } = require("../config/aws-config");
 const path = require('path');
-require('dotenv').config();
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const apiUrl = process.env.API_URL;
 
 

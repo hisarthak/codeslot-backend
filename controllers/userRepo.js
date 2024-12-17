@@ -15,6 +15,7 @@ const S3_BUCKETT = process.env.S3_BUCKET;
 
 
 
+
 // Create an array to store the commit data
 let commitDataArray = [];
 
@@ -67,7 +68,9 @@ async function fetchAndProcessCommitDataFromS3(repoName, commitID) {
 
 // Function to fetch the commit data and store it in the array (without returning a response)
 async function repoFolderStructure() {
-  const repoName = "codeslot/codeslot"; // Hardcoded for testing
+  const repoNames = "codeslot%2Fcodeslot"; // Hardcoded for testing
+  const repoName = decodeURIComponent(repoNames);
+  console.log(repoName);
   try {
     // Step 1: Fetch the commit ID with the highest count from logs.json
     const commitID = await getHighestCountCommitFromS3(repoName);
@@ -80,8 +83,8 @@ async function repoFolderStructure() {
     const commitDataJson = await fetchAndProcessCommitDataFromS3(repoName, commitID);
 
     // You can check the array contents here, or handle it further
-    // console.log(commitDataArray); // Print the array with all the fetched commit data
-    console.log(S3_BUCKETT);
+    console.log(commitDataArray); // Print the array with all the fetched commit data
+    // console.log(S3_BUCKETT);
 
   } catch (error) {
     console.error("Error processing request:", error.message);
