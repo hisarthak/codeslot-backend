@@ -219,6 +219,7 @@ if(!repository){
 async function getHighestCountCommitFromS3(repoName) {
   try {
     const logsKey = `commits/${repoName}/logs.json`;
+    console.log(logsKey);
     const logsData = await s3.getObject({ Bucket: "apninewbucket", Key: logsKey }).promise();
     const logs = JSON.parse(logsData.Body.toString());
 
