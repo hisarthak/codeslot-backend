@@ -259,17 +259,18 @@ async function fetchAndProcessCommitDataFromS3(repoName, commitID) {
 
 // Route to handle requests for file system generation
 async function repoFolderStructure(req, res) {
-  // const { repoName } = req.params; // Extract repoName from URL
-repoName = "codeslot/codeslot";
   try {
+    const { repoName } = req.params; // Extract repoName from URL
+    const decodedRepoName = decodeURIComponent(repoName); // Decode URL-encoded repoName
+
     // Step 1: Fetch the commit ID with the highest count from logs.json
-    const commitID = await getHighestCountCommitFromS3(repoName);
+    const commitID = await getHighestCountCommitFromS3(decodedRepoName);
     if (!commitID) {
       return res.status(404).json({ error: 'No valid commit found.' });
     }
 
     // Step 2: Fetch and return commitData.json exactly as it is
-    const commitDataJson = await fetchAndProcessCommitDataFromS3(repoName, commitID);
+    const commitDataJson = await fetchAndProcessCommitDataFromS3(decodedRepoName, commitID);
     
     // Step 3: Return the commitDataJson as a response
     return res.json(commitDataJson);
@@ -277,7 +278,11 @@ repoName = "codeslot/codeslot";
     console.error("Error processing request:", error.message);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
-};
+}
+
+// Route definition
+app.get("/repo/user/:repoName", repoFolderStructure);
+
 
   
 

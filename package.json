@@ -17,7 +17,11 @@
   },
   "author": "Sarthak Pandey",
   "license": "ISC",
-  "keywords": ["version-control", "CLI", "slot"],
+  "keywords": [
+    "version-control",
+    "CLI",
+    "slot"
+  ],
   "dependencies": {
     "aws-sdk": "^2.1691.0",
     "axios": "^1.7.9",
@@ -31,12 +35,14 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.9.0",
     "mongoose": "^8.7.0",
+    "p-limit": "^6.1.0",
     "socket.io": "^4.8.0",
     "uuid": "^10.0.0",
     "yargs": "^17.7.2"
-  }, 
-   "devDependencies": {
+  },
+  "devDependencies": {
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0"
   }
+  
 }
