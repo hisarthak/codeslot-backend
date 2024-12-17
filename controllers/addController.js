@@ -50,7 +50,7 @@ async function loadSlotIgnore(ignoreFile) {
     const data = await fs.readFile(ignoreFile, "utf-8");
     return data.split("\n").map(line => line.trim()).filter(line => line && !line.startsWith("#"));
   } catch (err) {
-    console.error("Error loading .slotignore file:", err);
+    console.error("Error loading slotignore.txt file:", err);
     return [];
   }
 }
@@ -63,15 +63,18 @@ async function isFileIgnored(filePath, ignorePatterns) {
   return ignorePatterns.some(pattern => relativePath.includes(pattern));
 }
 
+
+
 async function getFileInode(filePath) {
   try {
     const stat = await fs.stat(filePath);
-    return stat.ino;
+    return stat.ino; // Correct property for the inode number
   } catch (err) {
     console.error(`Error getting inode for ${filePath}:`, err);
     return null;
   }
 }
+
 async function findTargetPath(targetName, snapshotPath, currentDir = process.cwd(), ignorePatterns = []) {
   let resolvedPath;
   // Parse the snapshot file
@@ -97,7 +100,7 @@ async function findTargetPath(targetName, snapshotPath, currentDir = process.cwd
     }
 
     // If the entry matches the targetName, add it to the matches list
-    if (entry.name === targetName) {
+    if (entry.text === targetName) {
       matches.push(entryPath); // Add the match to the list
     }
 
@@ -147,7 +150,7 @@ if (modifiedMatches.length === 1) {
 
 
 async function addFileToRepo(targetName) {
-  const slotIgnoreFile = path.join(process.cwd(), ".slotignore");
+  const slotIgnoreFile = path.join(process.cwd(), "slotignore.txt");
   const repoPath = path.resolve(process.cwd(), ".slot");
   const snapshotFile = path.join(repoPath, "oldSnapshot.json");
   const stagingDir = path.join(repoPath, "staging");
@@ -181,15 +184,18 @@ const relativePath = path.relative(process.cwd(), targetPath);
         const stagingDirPath = path.join(stagingDir, relativePath);
         await fs.mkdir(stagingDirPath, { recursive: true });
         snapshot[relativePath] = {
-          ino: inode,
-          name: targetName,
-          type: "folder",
+          id: inode,
+          text: targetName,
+          droppable: true,
+          parent: "",
+          path: relativePath,
           hash: "",
           message: "",
           commit_id: "",
           time: "",
           change: true,
-           };
+           }; 
+         
 
         const entries = await fs.readdir(targetPath, { withFileTypes: true });
         for (const entry of entries) {
@@ -202,7 +208,7 @@ const relativePath = path.relative(process.cwd(), targetPath);
         const fileHash = await calculateFileHash(targetPath);
         const oldFileSnapshot = snapshot[relativePath];
 
-        if (oldFileSnapshot && oldFileSnapshot.ino === inode && oldFileSnapshot.hash === fileHash) {
+        if (oldFileSnapshot && oldFileSnapshot.id === inode && oldFileSnapshot.hash === fileHash) {
           return;
         }
 
@@ -210,15 +216,18 @@ const relativePath = path.relative(process.cwd(), targetPath);
         await fs.copyFile(targetPath, stagingFilePath);
 
         snapshot[relativePath] = { 
-          ino: inode,
-          name: targetName,
+          id: inode,
+          text: targetName,
+          parent: "",
+          path: relativePath,
           hash: fileHash,
-          type: "file",
+         droppable: false,
           message: "",
           commit_Id: "",
           date : "",
           change: true,
              };
+       
       }
     }
 
@@ -247,7 +256,7 @@ const relativePath = path.relative(process.cwd(), targetPath);
           }
     
           // If it's a directory, we recursively check its contents
-          if (otherFile.type === 'folder') {
+          if (otherFile.droppable === true) {
             const childChange = await checkFolderChanges(snapshot, otherPath);
             if (childChange) {
               hasChangedChild = true;
@@ -262,7 +271,7 @@ const relativePath = path.relative(process.cwd(), targetPath);
     
     async function processSnapshotChanges(snapshot) {
       for (const [relativePath, newFile] of Object.entries(snapshot)) {
-        if (newFile.type === "folder") {
+        if (newFile.droppable === true) {
           // Check if this folder or any of its subdirectories have changes
           const hasChangedChild = await checkFolderChanges(snapshot, relativePath);
     
@@ -293,7 +302,7 @@ const relativePath = path.relative(process.cwd(), targetPath);
 
 
 async function addModifiedOrLogs() {
-  const slotIgnoreFile = path.join(process.cwd(), ".slotignore");
+  const slotIgnoreFile = path.join(process.cwd(), "slotignore.txt");
   const repoPath = path.resolve(process.cwd(), ".slot");
   const snapshotFile = path.join(repoPath, "oldSnapshot.json");
   const stagingDir = path.join(repoPath, "staging");
@@ -322,17 +331,18 @@ async function addModifiedOrLogs() {
           const stagingDirPath = path.join(stagingDir, relativePath);
           await fs.mkdir(stagingDirPath, { recursive: true });
           
-          const matchedOldFile = Object.values(oldSnapshot).find((oldFile) => oldFile.ino === inode);
-          
-          // Copy the change field from oldSnapshot if inode matches
+          const matchedOldFile = Object.values(oldSnapshot).find((oldFile) => oldFile.id === inode);
+
           newSnapshot[relativePath] = { 
-            ino: inode,
-            name: entry.name,
-            type: "folder",
-            message: "",
-            commit_id: "",
+            id: inode,
+           text: entry.name,
+            droppable: true,
+            path: relativePath,
+            parent: path.dirname(relativePath),
+            commit_id: matchedOldFile ? matchedOldFile.commit_id : "",
+            message: matchedOldFile ? matchedOldFile.message : "",
             change: matchedOldFile ? matchedOldFile.change : true,  // Get change field from oldSnapshot if inode matches
-            date : "",
+            date : matchedOldFile ? matchedOldFile.date: "",
             new: !matchedOldFile,
           };
           // Recurse into subdirectories
@@ -347,46 +357,57 @@ async function addModifiedOrLogs() {
           await fs.mkdir(path.dirname(stagingFilePath), { recursive: true }); // Ensure the directory exists
           await fs.writeFile(stagingFilePath, fileContent); // Write the file content
     
-          const matchedOldFile = Object.values(oldSnapshot).find((oldFile) => oldFile.ino === inode);
-    
-          // Copy the change field from oldSnapshot if inode matches
-          newSnapshot[relativePath] = { 
-            ino: inode, 
-            name: entry.name, 
+          const matchedOldFile = Object.values(oldSnapshot).find((oldFile) => oldFile.id === inode);
+          // Debugging output
+console.log("Matched Old File:", matchedOldFile);
+if (matchedOldFile) {
+  console.log("Old File ID:", matchedOldFile.id);
+  console.log("Provided inode:", inode);
+} else {
+  console.log("No match found for inode:", inode);
+}
+
+newSnapshot[relativePath] = { 
+            id: inode, 
+            text: entry.name,
+            path: relativePath,
+           parent: path.dirname(relativePath),
             hash: fileHash, 
-            type: "file",
-            message: "",
-            commit_id: "",
+            droppable: false,
+            message: matchedOldFile ? matchedOldFile.message : "",
+            commit_id: matchedOldFile ? matchedOldFile.commit_id : "",
             change: matchedOldFile ? matchedOldFile.change : true,  // Get change field from oldSnapshot if inode matches
-            date: "",
+            date: matchedOldFile ? matchedOldFile.date : "",
           };
         }
       }
     }
 
+
     await processDirectory(process.cwd());
-    
 
     for (const [relativePath, newFile] of Object.entries(newSnapshot)) {
-      const oldFile = Object.values(oldSnapshot).find((file) => file.ino === newFile.ino);
-    if(oldFile){
- // Check if the file has been modified (hash has changed)
- if (oldFile.hash !== newFile.hash) {
-  console.log(`Modified: ${oldFile.name}`);
-  newSnapshot[relativePath].change = true; // Mark as changed
-}}
+      const oldFile = Object.values(oldSnapshot).find((file) => file.id === newFile.id);
+
+
       if (oldFile) {
         const oldRelativePath = Object.keys(oldSnapshot).find(key => oldSnapshot[key] === oldFile);
     
+ // Check if the file has been modified (hash has changed)
+ if (oldFile.hash !== newFile.hash) {
+  console.log(`Modified: ${oldFile.text}`);
+  newSnapshot[relativePath].change = true; // Mark as changed
+}
+
         // Check if the file has been renamed
-        if (oldFile.name !== newFile.name) {
-          console.log(`Renamed: ${oldFile.name} -> ${newFile.name}`);
+        if (oldFile.text !== newFile.text) {
+          console.log(`Renamed: ${oldFile.text} -> ${newFile.text}`);
           newSnapshot[relativePath].change = true; // Mark as changed
         }
     
         // Check if the file has been moved (path changed, name is the same)
-        if (oldRelativePath !== relativePath && oldFile.name === newFile.name) {
-          console.log(`Moved: ${oldFile.name} from ${oldRelativePath} to ${relativePath}`);
+        if (oldRelativePath !== relativePath) {
+          console.log(`Moved: ${oldFile.text} from ${oldRelativePath} to ${relativePath}`);
           newSnapshot[relativePath].change = true; // Mark as changed
         }
     
@@ -411,7 +432,7 @@ async function addModifiedOrLogs() {
           }
     
           // If it's a directory, we recursively check its contents
-          if (otherFile.type === 'folder') {
+          if (otherFile.droppable === true) {
             const childChange = await checkFolderChanges(newSnapshot, otherPath);
             if (childChange) {
               hasChangedChild = true;
@@ -426,7 +447,7 @@ async function addModifiedOrLogs() {
     
     async function processSnapshotChanges(newSnapshot) {
       for (const [relativePath, newFile] of Object.entries(newSnapshot)) {
-        if (newFile.type === "folder") {
+        if (newFile.droppable === true) {
           // Check if this folder or any of its subdirectories have changes
           const hasChangedChild = await checkFolderChanges(newSnapshot, relativePath);
     
@@ -450,7 +471,7 @@ async function addModifiedOrLogs() {
     await fs.writeFile(path.join(repoPath, "newSnapshot.json"), JSON.stringify(newSnapshot, null, 2));
     await fs.writeFile(snapshotFile, JSON.stringify(newSnapshot, null, 2));
 
-    console.log("Operation complete");
+    // console.log("Operation complete");
   } catch (err) {
     console.error("Error adding files or folders to repo:", err);
   }

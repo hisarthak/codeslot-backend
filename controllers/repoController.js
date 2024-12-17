@@ -4,6 +4,9 @@ const User = require("../models/userModel");
 const Issue = require("../models/issueModel");
 const axios = require('axios');
 require('dotenv').config();
+const { s3, S3_BUCKET } = require("../config/aws-config");
+const path = require('path');
+require('dotenv').config();
 const apiUrl = process.env.API_URL;
 
 
@@ -210,7 +213,76 @@ if(!repository){
       }
 };
 
+// Function to get the commit with the highest count from logs.json
+async function getHighestCountCommitFromS3(repoName) {
+  try {
+    const logsKey = `commits/${repoName}/logs.json`;
+    const logsData = await s3.getObject({ Bucket: process.env.S3_BUCKET, Key: logsKey }).promise();
+    const logs = JSON.parse(logsData.Body.toString());
+
+    let highestCountCommit = null;
+    let maxCount = 0;
+
+    // Loop through logs and find the commit with the highest count
+    for (const commit of logs) {
+      if (commit.count > maxCount) {
+        maxCount = commit.count;
+        highestCountCommit = commit;
+      }
+    }
+
+    if (highestCountCommit) {
+      return highestCountCommit.commitID; // Return the commitID with the highest count
+    } else {
+      throw new Error("No commits found in logs.json");
+    }
+  } catch (error) {
+    console.error("Error fetching or processing logs.json from S3:", error.message);
+    return null;
+  }
+}
+
+// Function to fetch commitData.json and return it exactly
+async function fetchAndProcessCommitDataFromS3(repoName, commitID) {
+  try {
+    const commitDataKey = `commits/${repoName}/${commitID}/commitData.json`;
+    const commitData = await s3.getObject({ Bucket: process.env.S3_BUCKET, Key: commitDataKey }).promise();
+    const commitDataJson = JSON.parse(commitData.Body.toString());
+
+    // Return the commitDataJson exactly as it is
+    return commitDataJson;
+  } catch (error) {
+    console.error("Error fetching or processing commitData.json from S3:", error.message);
+    return {}; // Return an empty object if there's an error
+  }
+}
+
+// Route to handle requests for file system generation
+async function repoFolderStructure(req, res) {
+  // const { repoName } = req.params; // Extract repoName from URL
+repoName = "codeslot/codeslot";
+  try {
+    // Step 1: Fetch the commit ID with the highest count from logs.json
+    const commitID = await getHighestCountCommitFromS3(repoName);
+    if (!commitID) {
+      return res.status(404).json({ error: 'No valid commit found.' });
+    }
+
+    // Step 2: Fetch and return commitData.json exactly as it is
+    const commitDataJson = await fetchAndProcessCommitDataFromS3(repoName, commitID);
+    
+    // Step 3: Return the commitDataJson as a response
+    return res.json(commitDataJson);
+  } catch (error) {
+    console.error("Error processing request:", error.message);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+  
+
 module.exports = {
+    repoFolderStructure,
     createRepository,
     getAllRepositories,
     fetchRepositoryById,

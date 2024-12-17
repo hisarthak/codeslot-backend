@@ -7,10 +7,12 @@ const axios = require("axios");
 require("dotenv").config();
 const apiUrl = process.env.API_URL;
 
-// Helper function to check if the user is logged in (checks the .myGit/config.json)
+
+
+// Helper function to check if the user is logged in (checks the .slot/config.json)
 async function isLoggedIn() {
     try {
-        const configPath = path.join(__dirname, "..", ".myGit", "config.json");
+        const configPath = path.join(__dirname, "..", ".slot", "config.json");
         const config = await fs.readFile(configPath, "utf8");
         const userConfig = JSON.parse(config);
 
@@ -34,9 +36,10 @@ async function isLoggedIn() {
 // Helper function to validate if the username matches the remote URL
 async function validateRepositoryAccess() {
     try {
-        // Adjust path to .myGit folder
-        const configPath = path.join(__dirname, "..", ".myGit", "config.json");
-        const remotePath = path.join(__dirname, "..", ".myGit", ".remote.json");
+        // Adjust path to .slot folder
+        const configPath = path.join(__dirname, "..", ".slot", "config.json");
+        const remotePath = path.join(__dirname, "..", ".slot", ".remote.json");
+     
 
         // Read the config file (which contains the username)
         const configData = await fs.readFile(configPath, "utf8");
@@ -60,7 +63,9 @@ async function validateRepositoryAccess() {
         // Compare usernames
         if (username !== remoteUsername) {
             throw new Error(
-                `Access denied. You do not have permission to access this repository. Repository: ${remoteRepo}`
+                `Access denied. You do not have permission to access this repository. 
+Repository: ${remoteRepo},
+Username: ${username} `
             );
         }
     } catch (err) {
@@ -92,7 +97,7 @@ function promptLogin() {
                         }
                     );
 
-                    // Save token to .myGit/config.json
+                    // Save token to .slot/config.json
                     const token = res.data.token;
 
                     const userConfig = {
@@ -102,7 +107,7 @@ function promptLogin() {
 
                     // Save config file
                     await fs.writeFile(
-                        path.join(process.cwd(), ".myGit", "config.json"),
+                        path.join(process.cwd(), ".slot", "config.json"),
                         JSON.stringify(userConfig, null, 2)
                     );
                     resolve(token); // Return token after successful login
@@ -119,63 +124,120 @@ function promptLogin() {
         });
     });
 }
-
-// The main pushRepo function which combines login, validation, and pushing to S3
 async function pushRepo() {
-    const loggedIn = await isLoggedIn();
-
-    let token;
-    if (!loggedIn) {
-        console.log("Authentication required, valid for 30 days.");
-        token = await promptLogin(); // Prompt for login if not logged in
-        console.log("Authentication successful.");
-    }
-
-    // Validate repository access
-    await validateRepositoryAccess();
-
-    console.log("Pushing...");
-    const repoPath = path.resolve(process.cwd(), ".myGit");
-    const commitsPath = path.join(repoPath, "commits");
+    const repoPath = path.resolve(process.cwd(), ".slot");
+    const remotePath = path.join(repoPath, ".remote.json");
+    const commitPath = path.join(repoPath, "commits");
+    const logsPath = path.join(repoPath, "logs.json");
+   
+  
 
     try {
-        const commitDirs = await fs.readdir(commitsPath);
-        for (const commitDir of commitDirs) {
-            const commitPath = path.join(commitsPath, commitDir);
-            const files = await fs.readdir(commitPath);
-
-            for (const file of files) {
-                const filePath = path.join(commitPath, file);
-                const fileContent = await fs.readFile(filePath);
-
-                // Use repoName for the Key structure in S3
-                const remotePath = path.join(__dirname, "..", ".myGit", ".remote.json");
-                const remoteData = await fs.readFile(remotePath, "utf8");
-                const remote = JSON.parse(remoteData);
-                const remoteUrl = remote.url;
-                const match = remoteUrl.match(/^https:\/\/slotcode\.in\/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)$/);
-                const repoName = match ? match[1] : null;
-
-                if (!repoName) {
-                    throw new Error("Invalid repository name format.");
-                }
-
-                const params = {
-                    Bucket: S3_BUCKET,
-                    Key: `commits/${repoName}/${commitDir}/${file}`, // Use the full repoName (username/repositoryName)
-                    Body: fileContent,
-                };
-
-                // Upload the file to S3
-                await s3.upload(params).promise();
-            }
+        // Check if remote.json exists
+        try {
+            await fs.access(remotePath);
+        } catch {
+            console.error("Remote not set. Please set the remote repository using 'slot remote add <url>'.");
+            return;
         }
+        const remoteData = await fs.readFile(remotePath, "utf8");
+        const remote = JSON.parse(remoteData);
+        const remoteUrl = remote.url;
+        const match = remoteUrl.match(/^https:\/\/slotcode\.in\/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)$/);
+        const repoName = match ? match[1] : null;
+          if (!repoName) {
+            throw new Error("Invalid repository name format.");
+        }      
 
+        const loggedIn = await isLoggedIn();
+        let token;
+        if (!loggedIn) {
+            console.log("Authentication required, valid for 30 days.");
+            token = await promptLogin(); // Prompt for login if not logged in
+            console.log("Authentication successful.");
+        }
+    
+        // Validate repository access
+        await validateRepositoryAccess();
+
+
+        // Read and parse logs.json
+        const logs = JSON.parse(await fs.readFile(logsPath, "utf8"));
+        
+        // Find the object with the highest count
+        const highestCountCommit = logs.reduce((max, commit) => 
+            commit.count > max.count ? commit : max, 
+            logs[0] || {}
+        );
+
+        // Check if the commit exists and push is true
+        if (!highestCountCommit || !highestCountCommit.push) {
+            console.log("Everything up to date.");
+            return;
+        }
+        console.log("Pushing...");
+
+
+        // Read and validate commit.json
+        const commitDirs = await fs.readdir(commitPath);
+
+        for (const commitDir of commitDirs) {
+
+            const commitDirPath = path.join(commitPath, commitDir);
+          
+          
+
+            
+
+            // Recursively upload files and directories with correct paths
+            await uploadDirectoryToS3(commitDirPath, `commits/${repoName}/${commitDir}`, commitDirPath);
+        }
+        const logsContent = await fs.readFile(logsPath, "utf8");
+
+        const logsS3Params = {
+            Bucket: S3_BUCKET,
+            Key: `commits/${repoName}/logs.json`,  // Save logs.json to the "commits/repoName" folder
+            Body: logsContent,
+        };
+        await s3.upload(logsS3Params).promise();  // Upload logs.json to S3
+
+        highestCountCommit.push = false;
+        // Write the updated logs.json back to file
+        await fs.writeFile(logsPath, JSON.stringify(logs, null, 2), "utf8");
         console.log("Pushed successfully");
     } catch (err) {
         console.error("Error during pushing commits: ", err.message);
     }
 }
+// Recursive function to upload directory to S3 with relative paths
+async function uploadDirectoryToS3(localPath, s3BasePath, rootPath) {
+    const items = await fs.readdir(localPath);
+
+    for (const item of items) {
+        const itemPath = path.join(localPath, item);
+        const stats = await fs.stat(itemPath);
+
+        if (stats.isFile()) {
+            // Read file content
+            const fileContent = await fs.readFile(itemPath);
+
+            // Determine relative path for S3 and normalize to use forward slashes
+            const relativePath = path.relative(rootPath, itemPath).replace(/\\/g, "/");
+
+            // Upload file to S3
+            const params = {
+                Bucket: S3_BUCKET,
+                Key: `${s3BasePath}/${relativePath}`, // Include relative path in the S3 key
+                Body: fileContent,
+            };
+            await s3.upload(params).promise();
+        } else if (stats.isDirectory()) {
+            // Recursively upload the directory
+            await uploadDirectoryToS3(itemPath, s3BasePath, rootPath);
+        }
+    }
+}
+
 
 module.exports = {
     pushRepo,

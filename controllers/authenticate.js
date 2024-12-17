@@ -31,7 +31,7 @@ function authenticateUser() {
                         }
                     );
 
-                    // Save token to .myGit/config.json
+                    // Save token to .slot/config.json
                     const token = res.data.token;
 
                     const userConfig = {
@@ -40,7 +40,7 @@ function authenticateUser() {
                     };
 
                     // Save config file
-                    const configDir = path.join(process.cwd(), ".myGit");
+                    const configDir = path.join(process.cwd(), ".slot");
                     const configPath = path.join(configDir, "config.json");
 
                     // Check if the directory exists, create it if not
