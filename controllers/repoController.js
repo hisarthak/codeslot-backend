@@ -217,7 +217,7 @@ if(!repository){
 async function getHighestCountCommitFromS3(repoName) {
   try {
     const logsKey = `commits/${repoName}/logs.json`;
-    const logsData = await s3.getObject({ Bucket: process.env.S3_BUCKET, Key: logsKey }).promise();
+    const logsData = await s3.getObject({ Bucket: "apninewbucket", Key: logsKey }).promise();
     const logs = JSON.parse(logsData.Body.toString());
 
     let highestCountCommit = null;
@@ -246,7 +246,7 @@ async function getHighestCountCommitFromS3(repoName) {
 async function fetchAndProcessCommitDataFromS3(repoName, commitID) {
   try {
     const commitDataKey = `commits/${repoName}/${commitID}/commitData.json`;
-    const commitData = await s3.getObject({ Bucket: process.env.S3_BUCKET, Key: commitDataKey }).promise();
+    const commitData = await s3.getObject({ Bucket: "apninewbucket", Key: commitDataKey }).promise();
     const commitDataJson = JSON.parse(commitData.Body.toString());
 
     // Return the commitDataJson exactly as it is
