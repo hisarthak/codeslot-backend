@@ -280,8 +280,6 @@ async function repoFolderStructure(req, res) {
   }
 }
 
-// Route definition
-app.get("/repo/user/:repoName", repoFolderStructure);
 
 
   
