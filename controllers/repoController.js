@@ -305,6 +305,8 @@ async function fetchFileContent(req, res) {
     const { reponame, filePath } = req.params; // Extract repoName and filePath from request
     const decodedRepoName = decodeURIComponent(reponame);
     const decodedFilePath = decodeURIComponent(filePath);
+    console.log(decodedRepoName);
+    console.log(decodedFilePath);
 
     // Step 1: Get the highest count commit ID
     const commitID = await getHighestCountCommitFromS3(decodedRepoName);
