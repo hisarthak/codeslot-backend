@@ -215,6 +215,8 @@ if(!repository){
       }
 };
 
+
+
 // Function to get the commit with the highest count from logs.json
 async function getHighestCountCommitFromS3(repoName) {
   try {
@@ -285,12 +287,50 @@ async function repoFolderStructure(req, res) {
   }
 }
 
+// Function to fetch file content from S3
+async function fetchFileContentFromS3(repoName, commitID, filePath) {
+  try {
+    const fileKey = `commits/${repoName}/${commitID}/${filePath}`;
+    const fileData = await s3.getObject({ Bucket: "apninewbucket", Key: fileKey }).promise();
+    return fileData.Body.toString(); // Return file content as a string
+  } catch (error) {
+    console.error("Error fetching file content from S3:", error.message);
+    return null;
+  }
+}
+
+// Route to handle file content extraction
+async function fetchFileContent(req, res) {
+  try {
+    const { reponame, filePath } = req.params; // Extract repoName and filePath from request
+    const decodedRepoName = decodeURIComponent(reponame);
+    const decodedFilePath = decodeURIComponent(filePath);
+
+    // Step 1: Get the highest count commit ID
+    const commitID = await getHighestCountCommitFromS3(decodedRepoName);
+    if (!commitID) {
+      return res.status(404).json({ error: 'No valid commit found.' });
+    }
+
+    // Step 4: Fetch the content of the file from S3
+    const fileContent = await fetchFileContentFromS3(decodedRepoName, commitID, decodedFilePath);
+    if (!fileContent) {
+      return res.status(404).json({ error: 'Unable to fetch file content.' });
+    }
+
+    // Step 5: Send the file content as a response
+    return res.json({ content: fileContent });
+  } catch (error) {
+    console.error("Error processing request:", error.message);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
 
 
-  
 
 module.exports = {
     repoFolderStructure,
+    fetchFileContent,
     createRepository,
     getAllRepositories,
     fetchRepositoryById,

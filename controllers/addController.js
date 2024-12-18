@@ -345,6 +345,7 @@ async function addModifiedOrLogs() {
             date : matchedOldFile ? matchedOldFile.date: "",
             new: !matchedOldFile,
           };
+          
           // Recurse into subdirectories
           await processDirectory(entryPath);
         } else {

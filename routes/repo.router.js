@@ -9,6 +9,7 @@ repoRouter.get("/repo/all", repoController.getAllRepositories);
 // Specific routes first
 repoRouter.get("/repo/name/:name", repoController.fetchRepositoryByName);
 repoRouter.get("/repo/user/details/:reponame", repoController.repoFolderStructure);
+repoRouter.get("/repo/user/details/:reponame/:filePath", repoController.fetchFileContent);
 repoRouter.get("/repo/user/:userID", repoController.fetchRepositoriesForCurrentUser);
 
 // General routes last

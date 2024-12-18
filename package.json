@@ -29,6 +29,7 @@
     "body-parser": "^1.20.3",
     "chokidar": "^4.0.1",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "http": "^0.0.1-security",
@@ -44,5 +45,4 @@
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0"
   }
-  
 }
