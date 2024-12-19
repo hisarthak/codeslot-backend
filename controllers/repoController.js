@@ -299,28 +299,76 @@ async function fetchFileContentFromS3(repoName, commitID, filePath) {
   }
 }
 
-// Route to handle file content extraction
+// Function to fetch file content from S3 based on repoName, commitID, and inode
+async function fetchFileContentByInode(repoName, commitID, inode) {
+  try {
+    // Step 1: Fetch the commitData file
+    const commitDataKey = `commits/${repoName}/${commitID}/commitData`;
+    const commitData = await s3.getObject({ Bucket: "apninewbucket", Key: commitDataKey }).promise();
+    const commitDataContent = JSON.parse(commitData.Body.toString()); // Parse JSON if commitData is JSON
+
+    // Step 2: Search for the file with the same inode in the commitData content
+    const targetFile = commitDataContent.find((file) => file.inode === inode);
+    if (!targetFile) {
+      console.error("File with the specified inode not found in commitData");
+      return null;
+    }
+
+    // Step 3: Extract the file path from the target file
+    const filePath = targetFile.path; // Assuming the file object has a `path` property
+
+    // Step 4: Fetch the file content using the file path
+    const fileKey = `commits/${repoName}/${commitID}/${filePath}`;
+    const fileData = await s3.getObject({ Bucket: "apninewbucket", Key: fileKey }).promise();
+
+    // Return the file content as a string
+    return fileData.Body.toString();
+  } catch (error) {
+    console.error("Error fetching file content from S3:", error.message);
+    return null;
+  }
+}
+
 async function fetchFileContent(req, res) {
   try {
-    const { reponame, filePath } = req.params; // Extract repoName and filePath from request
+    const { reponame, filePath } = req.params; // Extract reponame and filePath from request params
+    const { inode, commit } = req.query; // Extract inode and commit from request query
+
     const decodedRepoName = decodeURIComponent(reponame);
-    const decodedFilePath = decodeURIComponent(filePath);
-    console.log(decodedRepoName);
-    console.log(decodedFilePath);
+    const decodedFilePath = filePath ? decodeURIComponent(filePath) : null;
 
-    // Step 1: Get the highest count commit ID
-    const commitID = await getHighestCountCommitFromS3(decodedRepoName);
-    if (!commitID) {
-      return res.status(404).json({ error: 'No valid commit found.' });
+    const decodedInode = decodedURIComponent(inode);
+    const decodedCommit = decodedURIComponent(commit)
+
+    console.log("Repository Name:", decodedRepoName);
+    if (decodedFilePath) console.log("File Path:", decodedFilePath);
+    if (inode) console.log("Inode:", inode);
+    if (commit) console.log("Commit:", commit);
+
+    let fileContent;
+
+    if (inode && commit) {
+      // Use fetchFileByInode when inode and commit are provided
+      fileContent = await fetchFileContentByInode(decodedRepoName, decodedCommit, decodedInode);
+      if (!fileContent) {
+        return res.status(404).json({ error: 'Unable to fetch file content by inode.' });
+      }
+    } else if (decodedFilePath) {
+      // Use fetchFileContentFromS3 when inode and commit are not provided
+      const commitID = await getHighestCountCommitFromS3(decodedRepoName);
+      if (!commitID) {
+        return res.status(404).json({ error: 'No valid commit found.' });
+      }
+
+      fileContent = await fetchFileContentFromS3(decodedRepoName, commitID, decodedFilePath);
+      if (!fileContent) {
+        return res.status(404).json({ error: 'Unable to fetch file content by file path.' });
+      }
+    } else {
+      return res.status(400).json({ error: 'Invalid request. Provide either inode and commit, or filePath.' });
     }
 
-    // Step 4: Fetch the content of the file from S3
-    const fileContent = await fetchFileContentFromS3(decodedRepoName, commitID, decodedFilePath);
-    if (!fileContent) {
-      return res.status(404).json({ error: 'Unable to fetch file content.' });
-    }
-
-    // Step 5: Send the file content as a response
+    // Send the file content as a response
     return res.json({ content: fileContent });
   } catch (error) {
     console.error("Error processing request:", error.message);

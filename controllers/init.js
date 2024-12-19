@@ -39,7 +39,7 @@ Each line in this file represents a file or directory that will be excluded from
 
 Note: Ensure that no additional spaces or characters are present when specifying paths.  
 
-# Below are some default ignored files and folders
+# Below are some default ignored files and folders. You may choose to modify these based on your repository's needs.
 .env
 node_modules
 package-lock.json
