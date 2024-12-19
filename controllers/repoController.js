@@ -326,7 +326,8 @@ async function fetchFileContentByInode(repoName, commitID, inode) {
     }
 
     // Step 3: Extract the file path from the target file
-    const filePath = targetFile.path; // Assuming the file object has a `path` property
+    let filePath = targetFile.path; // Assuming the file object has a `path` property
+    filePath.replace(/\\/g, "/"); 
 
     // Step 4: Fetch the file content using the file path
     const fileKey = `commits/${repoName}/${commitID}/${filePath}`;
