@@ -312,7 +312,12 @@ async function fetchFileContentByInode(repoName, commitID, inode) {
 
     // Extract all values from the commitDataContent object
     const filesArray = Object.values(commitDataContent);
-
+    console.log(filesArray);
+    const inodeNumber = Number(inode);
+    if (isNaN(inodeNumber)) {
+      console.error(`Invalid inode: ${inode}`);
+      return null;
+    }
     // Step 2: Search for the file with the same inode
     const targetFile = filesArray.find((file) => file.id === inode); // Assuming `id` corresponds to `inode`
     if (!targetFile) {
