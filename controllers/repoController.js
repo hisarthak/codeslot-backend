@@ -337,8 +337,8 @@ async function fetchFileContent(req, res) {
     const decodedRepoName = decodeURIComponent(reponame);
     const decodedFilePath = filePath ? decodeURIComponent(filePath) : null;
 
-    const decodedInode = decodedURIComponent(inode);
-    const decodedCommit = decodedURIComponent(commit)
+    const decodedInode = decodeURIComponent(inode);
+    const decodedCommit = decodeURIComponent(commit)
 
     console.log("Repository Name:", decodedRepoName);
     if (decodedFilePath) console.log("File Path:", decodedFilePath);
