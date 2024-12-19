@@ -308,7 +308,7 @@ async function fetchFileContentByInode(repoName, commitID, inode) {
 
     // Parse the commitData content
     const commitDataContent = JSON.parse(commitData.Body.toString());
-    console.log("Parsed Commit Data:", commitDataContent);
+    // console.log("Parsed Commit Data:", commitDataContent);
 
     // Extract all values from the commitDataContent object
     const filesArray = Object.values(commitDataContent);
@@ -316,7 +316,7 @@ async function fetchFileContentByInode(repoName, commitID, inode) {
     // Step 2: Search for the file with the same inode
     const targetFile = filesArray.find((file) => file.id === inode); // Assuming `id` corresponds to `inode`
     if (!targetFile) {
-      console.error("File with the specified inode not found in commitData");
+      console.error(`File with the specified inode (${inode}) not found in commitData`);
       return null;
     }
 
