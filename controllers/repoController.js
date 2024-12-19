@@ -305,7 +305,18 @@ async function fetchFileContentByInode(repoName, commitID, inode) {
     // Step 1: Fetch the commitData file
     const commitDataKey = `commits/${repoName}/${commitID}/commitData.json`;
     const commitData = await s3.getObject({ Bucket: "apninewbucket", Key: commitDataKey }).promise();
+
+    // Parse the commitData content
     const commitDataContent = JSON.parse(commitData.Body.toString()); // Parse JSON if commitData is JSON
+
+    // Log the parsed commitDataContent for debugging
+    console.log("Commit Data Content:", commitDataContent);
+
+    // Ensure commitDataContent is an array
+    if (!Array.isArray(commitDataContent)) {
+      console.error("Commit data content is not an array:", commitDataContent);
+      return null;
+    }
 
     // Step 2: Search for the file with the same inode in the commitData content
     const targetFile = commitDataContent.find((file) => file.inode === inode);
@@ -328,6 +339,7 @@ async function fetchFileContentByInode(repoName, commitID, inode) {
     return null;
   }
 }
+
 
 async function fetchFileContent(req, res) {
   try {
