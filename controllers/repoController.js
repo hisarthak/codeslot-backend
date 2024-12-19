@@ -303,7 +303,7 @@ async function fetchFileContentFromS3(repoName, commitID, filePath) {
 async function fetchFileContentByInode(repoName, commitID, inode) {
   try {
     // Step 1: Fetch the commitData file
-    const commitDataKey = `commits/${repoName}/${commitID}/commitData`;
+    const commitDataKey = `commits/${repoName}/${commitID}/commitData.json`;
     const commitData = await s3.getObject({ Bucket: "apninewbucket", Key: commitDataKey }).promise();
     const commitDataContent = JSON.parse(commitData.Body.toString()); // Parse JSON if commitData is JSON
 
