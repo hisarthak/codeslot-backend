@@ -312,7 +312,7 @@ async function fetchFileContentByInode(repoName, commitID, inode) {
 
     // Extract all values from the commitDataContent object
     const filesArray = Object.values(commitDataContent);
-    console.log(filesArray);
+    // console.log(filesArray);
     const inodeNumber = Number(inode);
     if (isNaN(inodeNumber)) {
       console.error(`Invalid inode: ${inode}`);
@@ -327,7 +327,7 @@ async function fetchFileContentByInode(repoName, commitID, inode) {
 
     // Step 3: Extract the file path from the target file
     let filePath = targetFile.path; // Assuming the file object has a `path` property
-    filePath.replace(/\\/g, "/"); 
+    filePath.replace(/\//g, "\\\\");
 
     // Step 4: Fetch the file content using the file path
     const fileKey = `commits/${repoName}/${commitID}/${filePath}`;
