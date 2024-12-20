@@ -328,7 +328,7 @@ async function fetchFileContentByInode(repoName, commitID, inode) {
     // Step 3: Extract the file path from the target file
     let filePath = targetFile.path; // Assuming the file object has a `path` property
     console.log(filePath);
-     const updatedPath = filePath.replace(/\//g, "\\\\");
+     const updatedPath = filePath.replace(/\\/g, "/");
     console.log(filePath);
 
     // Step 4: Fetch the file content using the file path
