@@ -385,11 +385,12 @@ async function fetchFileContent(req, res) {
         return res.status(404).json({ error: 'Unable to fetch file content by inode.' });
       }
     } else if (decodedFilePath) {
-      // Use fetchFileContentFromS3 when inode and commit are not provided
-      const commitID = await getHighestCountCommitFromS3(decodedRepoName);
-      if (!commitID) {
-        return res.status(404).json({ error: 'No valid commit found.' });
-      }
+      const highestCommitData = await getHighestCountCommitFromS3(decodedRepoName);
+    if (!highestCommitData) {
+      return res.status(404).json({ error: 'No valid commit found.' });
+    }
+    const { commitID, message, date, count } = highestCommitData;
+
 
       fileContent = await fetchFileContentFromS3(decodedRepoName, commitID, decodedFilePath);
       if (!fileContent) {
