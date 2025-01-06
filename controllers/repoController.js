@@ -277,10 +277,9 @@ async function repoFolderStructure(req, res) {
 
     // Step 1: Fetch the commit ID with the highest count from logs.json
     const highestCommitData = await getHighestCountCommitFromS3(decodedRepoName);
-    if (!commitID) {
+    if (!highestCommitData) {
       return res.status(404).json({ error: 'No valid commit found.' });
     }
-
     const { commitID, message, date, count } = highestCommitData;
 
     // Step 2: Fetch and return commitData.json exactly as it is
