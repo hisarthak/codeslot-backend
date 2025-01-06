@@ -228,7 +228,7 @@ async function getHighestCountCommitFromS3(repoName) {
     let highestCountCommit = null;
     let maxCount = 0;
 
-    // Loop through logs and find the commit with the highest count
+    // Loop through logs to find the commit with the highest count
     for (const commit of logs) {
       if (commit.count > maxCount) {
         maxCount = commit.count;
@@ -237,7 +237,12 @@ async function getHighestCountCommitFromS3(repoName) {
     }
 
     if (highestCountCommit) {
-      return highestCountCommit.commitID; // Return the commitID with the highest count
+      return {
+        commitID: highestCountCommit.commitID,
+        message: highestCountCommit.message,
+        date: highestCountCommit.date,
+        count: maxCount
+      };
     } else {
       throw new Error("No commits found in logs.json");
     }
@@ -271,16 +276,27 @@ async function repoFolderStructure(req, res) {
     console.log(decodedRepoName);
 
     // Step 1: Fetch the commit ID with the highest count from logs.json
-    const commitID = await getHighestCountCommitFromS3(decodedRepoName);
+    const highestCommitData = await getHighestCountCommitFromS3(decodedRepoName);
     if (!commitID) {
       return res.status(404).json({ error: 'No valid commit found.' });
     }
 
+    const { commitID, message, date, count } = highestCommitData;
+
     // Step 2: Fetch and return commitData.json exactly as it is
     const commitDataJson = await fetchAndProcessCommitDataFromS3(decodedRepoName, commitID);
     
-    // Step 3: Return the commitDataJson as a response
-    return res.json(commitDataJson);
+    const response = {
+      commitID,
+      message,
+      date,
+      count,
+      commitData: commitDataJson
+    };
+
+    // Return the enriched response
+    return res.json(response);
+
   } catch (error) {
     console.error("Error processing request:", error.message);
     return res.status(500).json({ error: 'Internal Server Error' });
@@ -325,6 +341,7 @@ async function fetchFileContentByInode(repoName, commitID, inode) {
       return null;
     }
 
+  
     // Step 3: Extract the file path from the target file
     let filePath = targetFile.path; // Assuming the file object has a `path` property
     console.log(filePath);
