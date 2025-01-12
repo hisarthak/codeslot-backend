@@ -272,19 +272,27 @@ async function repoFolderStructure(req, res) {
   try {
     const { reponame } = req.params; // Extract repoName from URL
     const decodedRepoName = decodeURIComponent(reponame); // Decode URL-encoded repoName
-    console.log(reponame);
-    console.log(decodedRepoName);
+    const { commitID: queryCommitID } = req.query; // Extract commitID from query parameters
 
-    // Step 1: Fetch the commit ID with the highest count from logs.json
-    const highestCommitData = await getHighestCountCommitFromS3(decodedRepoName);
-    if (!highestCommitData) {
-      return res.status(404).json({ error: 'No valid commit found.' });
+    let commitID, message = "", date = "", count = "";
+
+    if (queryCommitID) {
+      // Use commitID from the query if provided
+      commitID = queryCommitID;
+      console.log(`Using provided commitID: ${commitID}`);
+    } else {
+      // Fetch the commit ID with the highest count from logs.json
+      const highestCommitData = await getHighestCountCommitFromS3(decodedRepoName);
+      if (!highestCommitData) {
+        return res.status(404).json({ error: 'No valid commit found.' });
+      }
+      // Extract details from the highest commit data
+      ({ commitID, message, date, count } = highestCommitData);
     }
-    const { commitID, message, date, count } = highestCommitData;
 
-    // Step 2: Fetch and return commitData.json exactly as it is
+    // Fetch and return commitData.json exactly as it is
     const commitDataJson = await fetchAndProcessCommitDataFromS3(decodedRepoName, commitID);
-    
+
     const response = {
       commitID,
       message,
