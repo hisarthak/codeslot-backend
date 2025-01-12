@@ -408,6 +408,37 @@ async function fetchFileContent(req, res) {
   }
 }
 
+// Function to fetch logs file from S3 bucket and send it as a response
+async function fetchLogsFromS3(req, res) {
+  try {
+    const { reponame } = req.params; // Extract repoName from URL
+    const decodedRepoName = decodeURIComponent(reponame); // Decode URL-encoded repoName
+
+    // Define the S3 key for the logs file
+    const logsKey = `commits/${decodedRepoName}/logs.json`;
+
+    // Fetch the logs file from S3
+    const logsData = await s3.getObject({ Bucket: "apninewbucket", Key: logsKey }).promise();
+
+    // Parse the logs data to JSON
+    const logsJson = JSON.parse(logsData.Body.toString());
+
+    // Send the logs data as the response
+    return res.json(logsJson);
+
+  } catch (error) {
+    console.error("Error fetching logs from S3:", error.message);
+
+    // Return an appropriate error response
+    if (error.code === 'NoSuchKey') {
+      return res.status(404).json({ error: 'Logs file not found.' });
+    }
+
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+
 
 
 module.exports = {
@@ -421,4 +452,5 @@ module.exports = {
     updateRepositoryById,
     toggleVisibilityById,
     deleteRepositoryById,
+    fetchLogsFromS3,
 }
