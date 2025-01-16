@@ -2,7 +2,7 @@ const fs = require("fs").promises;
 const path = require("path");
 const readline = require("readline");
 const jwt = require("jsonwebtoken");
-const { s3, S3_BUCKET } = require("../config/aws-config");
+
 const axios = require("axios");
 require("dotenv").config();
 const apiUrl = process.env.API_URL;
@@ -148,7 +148,7 @@ async function pushRepo() {
           if (!repoName) {
             throw new Error("Invalid repository name format.");
         }      
-
+        https://github.com/hisarthak/TravelHaven.git
         const loggedIn = await isLoggedIn();
         let token;
         if (!loggedIn) {

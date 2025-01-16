@@ -151,7 +151,7 @@ const port = process.env.PORT || 3002;
 // Load SSL certificates
 const options = {
     key: fs.readFileSync('./privkey.pem'),   // Path to your SSL key
-    cert: fs.readFileSync('./fullchain.pem'),  // Path to your SSL certificate
+    cert: fs.readFileSync('./fullchain_with_intermediate.pem'),  // Path to your SSL certificate
 };
 
 // Middleware
