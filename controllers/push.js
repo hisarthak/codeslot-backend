@@ -148,7 +148,7 @@ async function pushRepo() {
           if (!repoName) {
             throw new Error("Invalid repository name format.");
         }      
-        https://github.com/hisarthak/TravelHaven.git
+        
         const loggedIn = await isLoggedIn();
         let token;
         if (!loggedIn) {
