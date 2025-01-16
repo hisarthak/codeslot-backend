@@ -150,8 +150,8 @@ const port = process.env.PORT || 3002;
 
 // Load SSL certificates
 const options = {
-    key: fs.readFileSync('/etc/letsencrypt/live/gitspace.duckdns.org/fullchain.pem'),   // Path to your SSL key
-    cert: fs.readFileSync('/etc/letsencrypt/live/gitspace.duckdns.org/privkey.pem'),  // Path to your SSL certificate
+    key: fs.readFileSync('./fullchain.pem'),   // Path to your SSL key
+    cert: fs.readFileSync('./privkey.pem'),  // Path to your SSL certificate
 };
 
 // Middleware
