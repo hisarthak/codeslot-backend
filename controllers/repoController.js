@@ -446,6 +446,37 @@ async function fetchLogsFromS3(req, res) {
   }
 }
 
+const findUsersAndRepositories = async (query) => {
+  try {
+      if (!query) {
+          throw new Error("Search query cannot be empty");
+      }
+
+      // Search for users matching the query
+      const matchedUsers = await User.find({
+          username: { $regex: query, $options: "i" },
+      });
+
+        // Search for repositories matching the query in name or description with visibility set to true
+        const matchedRepositories = await Repository.find({
+          $and: [
+              { visibility: true }, // Visibility must be true
+              {
+                  $or: [
+                      { name: { $regex: query, $options: "i" } },
+                      { description: { $regex: query, $options: "i" } },
+                  ],
+              },
+          ],
+      }).populate("owner", "username email"); // Populate owner details
+
+      return { users: matchedUsers, repositories: matchedRepositories };
+  } catch (error) {
+      console.error("Error while searching for users and repositories:", error.message);
+      throw error; // Re-throw the error for the calling function to handle
+  }
+};
+
 
 
 
@@ -461,4 +492,5 @@ module.exports = {
     toggleVisibilityById,
     deleteRepositoryById,
     fetchLogsFromS3,
+    findUsersAndRepositories,
 }

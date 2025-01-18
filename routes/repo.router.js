@@ -6,6 +6,7 @@ const repoRouter = express.Router();
 // General repository routes
 repoRouter.post("/repo/create", repoController.createRepository);
 repoRouter.get("/repo/all", repoController.getAllRepositories);
+repoRouter.get("/repo/search", repoController.findUsersAndRepositories);
 
 // Specific repository routes
 repoRouter.get("/repo/name/:name", repoController.fetchRepositoryByName);
