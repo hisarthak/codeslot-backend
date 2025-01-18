@@ -446,36 +446,42 @@ async function fetchLogsFromS3(req, res) {
   }
 }
 
-const findUsersAndRepositories = async (query) => {
+async function findUsersAndRepositories(req, res) {
   try {
-      if (!query) {
-          throw new Error("Search query cannot be empty");
-      }
+    const { query } = req.query; // Extract query from request query parameters
 
-      // Search for users matching the query
-      const matchedUsers = await User.find({
-          username: { $regex: query, $options: "i" },
-      });
+    if (!query) {
+      return res.status(400).json({ error: "Search query cannot be empty" });
+    }
 
-        // Search for repositories matching the query in name or description with visibility set to true
-        const matchedRepositories = await Repository.find({
-          $and: [
-              { visibility: true }, // Visibility must be true
-              {
-                  $or: [
-                      { name: { $regex: query, $options: "i" } },
-                      { description: { $regex: query, $options: "i" } },
-                  ],
-              },
+    // Search for users matching the query
+    const matchedUsers = await User.find({
+      username: { $regex: query, $options: "i" },
+    });
+
+    // Search for repositories matching the query in name or description with visibility set to true
+    const matchedRepositories = await Repository.find({
+      $and: [
+        { visibility: true }, // Visibility must be true
+        {
+          $or: [
+            { name: { $regex: query, $options: "i" } },
+            { description: { $regex: query, $options: "i" } },
           ],
-      }).populate("owner", "username email"); // Populate owner details
+        },
+      ],
+    }).populate("owner", "username email"); // Populate owner details
 
-      return { users: matchedUsers, repositories: matchedRepositories };
+    // Send the response with matched users and repositories
+    return res.json({ users: matchedUsers, repositories: matchedRepositories });
   } catch (error) {
-      console.error("Error while searching for users and repositories:", error.message);
-      throw error; // Re-throw the error for the calling function to handle
+    console.error("Error while searching for users and repositories:", error.message);
+
+    // Return an appropriate error response
+    return res.status(500).json({ error: "Internal Server Error" });
   }
-};
+}
+
 
 
 
