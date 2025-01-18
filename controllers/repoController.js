@@ -460,9 +460,12 @@ async function findUsersAndRepositories(req, res) {
     });
 
     // Search for repositories matching the query in name or description with visibility set to true
-    const matchedRepositories = await Repository.find({
+     const matchedRepositories = await Repository.find({
       $and: [
         { visibility: true }, // Visibility must be true
+        {
+          name: { $regex: `\/${query}$`, $options: "i" }, // Match part after "/"
+        },
         {
           $or: [
             { name: { $regex: query, $options: "i" } },
