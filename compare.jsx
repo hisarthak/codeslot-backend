@@ -1,37 +1,17 @@
-const handleFileClick = async (filePath, commitID) => {
-  try {
-    setIsFileClicked(true); // Mark that a file was clicked
-    setIsFileLoading(true); // Start loading file content
-    setFilePath(filePath);
-
-    const fixedPath = filePath.replace(/\\/g, "/"); // Replace all backslashes with forward slashes
-    let encodedPath = encodeURIComponent(fixedPath); // Encode the path
-
-    // If commitID is provided, find the file and append query params
-    if (commitID && originalData) {
-      const dataArray = Object.values(originalData);
-      const fileDetails = dataArray.find(
-        (item) => item.path === filePath && item.commit_id === commitID
-      );
-
-      if (fileDetails) {
-        const { id: inode } = fileDetails;
-        encodedPath = `${encodedPath}/?commit=${encodeURIComponent(commitID)}&inode=${encodeURIComponent(inode)}`;
-      } else {
-        console.error("File with the specified commitID not found");
-      }
-    }
-
-    const response = await axios.get(
-      `https://gitspace.duckdns.org:3002/repo/user/details/codeslot%2Fcodeslot/file/${encodedPath}`
-    );
-
-    setIsFileLoading(false); // Stop loading
-    console.log(response);
-    setFileContent(response.data.content || "File is empty");
-  } catch (error) {
-    console.error("Error fetching file content:", error);
-    setIsFileLoading(false);
-    setFileContent("");
-  }
-};
+{users.length > 0 && (
+    <div>
+        <h4>Users:</h4>
+        {users.map((user) => (
+            <div key={user._id} className="the-srch-box">
+                  <div className="repo-name-link">
+                                           <p style={{ color: "#74b9ff", display: "flex", fontWeight: "500"}}>
+                                            <div className="the-user">{repo.owner.username.charAt(0).toUpperCase()}</div><div  className='repo-main-info'><div className='repo-name-underline'  onClick={() => navigate(`/${repo.name}`)}>{user.username}</div>
+             
+                </div>
+                </p>
+                </div>
+                {/* Add any other user info you want to display */}
+            </div>
+        ))}
+    </div>
+)}

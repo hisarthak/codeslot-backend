@@ -450,27 +450,28 @@ async function findUsersAndRepositories(req, res) {
   try {
     const { query } = req.query; // Extract query from request query parameters
 
-    if (!query) {
+    if (!query || query.trim() === "") {
       return res.status(400).json({ error: "Search query cannot be empty" });
     }
 
     // Search for users matching the query
     const matchedUsers = await User.find({
-      username: { $regex: query, $options: "i" },
+      username: { $regex: query, $options: "i" }, // Case-insensitive search in username
     });
 
-    // Search for repositories matching the query in name or description with visibility set to true
-     const matchedRepositories = await Repository.find({
-      $and: [
-        { visibility: true }, // Visibility must be true
-        {
-          name: { $regex: `\/${query}$`, $options: "i" }, // Match part after "/"
+    // Search for repositories matching the query in the portion after "/"
+    const matchedRepositories = await Repository.find({
+      visibility: true, // Only visible repositories
+      $or: [
+        { 
+          name: { 
+            $regex: `/${query}$`, $options: "i" // Matches repositories where the portion after "/" ends with the query
+          } 
         },
-        {
-          $or: [
-            { name: { $regex: query, $options: "i" } },
-            { description: { $regex: query, $options: "i" } },
-          ],
+        { 
+          description: { 
+            $regex: query, $options: "i" // Matches the query anywhere in the description
+          } 
         },
       ],
     }).populate("owner", "username email"); // Populate owner details
