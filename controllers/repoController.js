@@ -464,9 +464,7 @@ async function findUsersAndRepositories(req, res) {
       visibility: true, // Only visible repositories
       $or: [
         { 
-          name: { 
-            $regex: `/${query}`, $options: "i" // Matches repositories where the portion after "/" ends with the query
-          } 
+          name: { $regex: `(?<=/).*${query}.*`, $options: "i" }
         },
         { 
           description: { 
