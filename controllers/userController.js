@@ -3,8 +3,7 @@ const bcrypt = require('bcryptjs');
 const { MongoClient } = require("mongodb");
 const dotenv = require("dotenv");
 var ObjectId = require("mongodb").ObjectId;
-const User = require("./models/User"); // Adjust the path as needed
-const Repository = require("./models/Repository"); // Adjust the path as needed
+
 
 dotenv.config();
 const uri = process.env.MONGODB_URI;
