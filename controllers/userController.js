@@ -251,17 +251,20 @@ async function starOrFollow(req, res) {
         }
         console.log("User is authorized to star the repository");
 
-        // Add the repository to the user's `starRepos` array if not already starred
-        if (!user.starRepos.includes(repo._id)) {
-            console.log("Starring the repository...");
-            await usersCollection.updateOne(
-                { username },
-                { $push: { starRepos: repo._id } }
-            );
-            console.log("Repository starred successfully.");
-        } else {
+        // Check if the repository is already starred
+        const isAlreadyStarred = user.starRepos.includes(repo._id);
+        if (isAlreadyStarred) {
             console.log("Repository already starred");
+            return res.status(200).json({ message: "Repository is already starred!" });
         }
+
+        // Add the repository to the user's `starRepos` array
+        console.log("Starring the repository...");
+        await usersCollection.updateOne(
+            { username },
+            { $push: { starRepos: repo._id } }
+        );
+        console.log("Repository starred successfully.");
 
         res.status(200).json({ message: "Repository starred successfully!" });
     } catch (err) {
@@ -274,6 +277,7 @@ async function starOrFollow(req, res) {
         res.status(500).json({ message: "Server error!" });
     }
 }
+
 
 
 module.exports = {
