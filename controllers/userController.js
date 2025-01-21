@@ -218,6 +218,7 @@ async function starOrFollow(req, res) {
         await connectClient();
         const db = client.db("githubclone");
         const usersCollection = db.collection("users");
+        const repositoriesCollection = db.collection("repositories"); // Create the repositories collection
 
         // Verify JWT token
         console.log("Verifying JWT token...");
@@ -236,7 +237,7 @@ async function starOrFollow(req, res) {
 
         // Check if the repository exists
         console.log("Checking if repository exists:", decodedRepoName);
-        const repo = await Repository.findOne({ name: decodedRepoName });
+        const repo = await repositoriesCollection.findOne({ name: decodedRepoName }); // Query the repositories collection
         if (!repo) {
             console.log("Repository not found");
             return res.status(404).json({ message: "Repository not found!" });
@@ -273,6 +274,7 @@ async function starOrFollow(req, res) {
         res.status(500).json({ message: "Server error!" });
     }
 }
+
 
 module.exports = {
     getAllUsers,
