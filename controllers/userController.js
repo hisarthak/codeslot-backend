@@ -216,6 +216,7 @@ async function starOrFollow(req, res) {
         // Connect to the database
         console.log("Connecting to database...");
         await connectClient();
+        console.log("Connected to database successfully.");
         const db = client.db("githubclone");
         const usersCollection = db.collection("users");
         const repositoriesCollection = db.collection("repositories"); // Create the repositories collection
@@ -224,13 +225,13 @@ async function starOrFollow(req, res) {
         console.log("Verifying JWT token...");
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
         const userId = decoded.id;
-        console.log("Decoded user ID:", userId);
+        console.log("Decoded user ID from JWT:", userId);
 
         // Find the user by username
         console.log("Finding user by username:", username);
         const user = await usersCollection.findOne({ username });
         if (!user) {
-            console.log("User not found");
+            console.log("User not found in database.");
             return res.status(404).json({ message: "User not found!" });
         }
         console.log("User found:", user);
@@ -239,22 +240,27 @@ async function starOrFollow(req, res) {
         console.log("Checking if repository exists:", decodedRepoName);
         const repo = await repositoriesCollection.findOne({ name: decodedRepoName }); // Query the repositories collection
         if (!repo) {
-            console.log("Repository not found");
+            console.log("Repository not found in database.");
             return res.status(404).json({ message: "Repository not found!" });
         }
         console.log("Repository found:", repo);
 
         // Ensure the user making the request is authorized
+        console.log("Checking user authorization...");
         if (String(userId) !== String(user._id)) {
-            console.log("User is not authorized to star this repository");
+            console.log("User is not authorized to star this repository.");
             return res.status(403).json({ message: "You are not authorized to star repositories for this user!" });
         }
-        console.log("User is authorized to star the repository");
+        console.log("User is authorized to star the repository.");
 
         // Check if the repository is already starred
+        console.log("Checking if repository is already starred...");
         const isAlreadyStarred = user.starRepos.includes(repo._id);
+        console.log("Is repository already starred:", isAlreadyStarred);
+
+        console.log(repo._id);
         if (isAlreadyStarred) {
-            console.log("Repository already starred");
+            console.log("Repository is already starred. No action needed.");
             return res.status(200).json({ message: "Repository is already starred!" });
         }
 
@@ -269,11 +275,13 @@ async function starOrFollow(req, res) {
         res.status(200).json({ message: "Repository starred successfully!" });
     } catch (err) {
         console.error("Error starring repository:", err.message);
+
         if (err.name === "JsonWebTokenError") {
-            console.log("Invalid token error");
+            console.log("Invalid JWT token provided.");
             return res.status(401).json({ message: "Invalid token!" });
         }
-        console.log("Unexpected error");
+
+        console.log("Unexpected error occurred.");
         res.status(500).json({ message: "Server error!" });
     }
 }
