@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 const { MongoClient } = require("mongodb");
 const dotenv = require("dotenv");
 var ObjectId = require("mongodb").ObjectId;
+const User = require("./models/User"); // Adjust the path as needed
+const Repository = require("./models/Repository"); // Adjust the path as needed
 
 dotenv.config();
 const uri = process.env.MONGODB_URI;
@@ -91,6 +93,7 @@ async function login(req, res) {
         res.status(500).send("Server error!");
     }
 }
+
 
 
 
@@ -201,6 +204,77 @@ res.json({message: "User Profile Deleted!"});
 
 };
 
+async function starOrFollow(req, res) {
+    const { username, reponame } = req.params; // Extract username and reponame from params
+    const { token } = req.query; // Extract token from query
+
+    // Decode the repository name
+    const decodedRepoName = decodeURIComponent(reponame);
+
+    console.log("Received request to star repository:", { username, decodedRepoName, token });
+
+    try {
+        // Connect to the database
+        console.log("Connecting to database...");
+        await connectClient();
+        const db = client.db("githubclone");
+        const usersCollection = db.collection("users");
+
+        // Verify JWT token
+        console.log("Verifying JWT token...");
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const userId = decoded.id;
+        console.log("Decoded user ID:", userId);
+
+        // Find the user by username
+        console.log("Finding user by username:", username);
+        const user = await usersCollection.findOne({ username });
+        if (!user) {
+            console.log("User not found");
+            return res.status(404).json({ message: "User not found!" });
+        }
+        console.log("User found:", user);
+
+        // Check if the repository exists
+        console.log("Checking if repository exists:", decodedRepoName);
+        const repo = await Repository.findOne({ name: decodedRepoName });
+        if (!repo) {
+            console.log("Repository not found");
+            return res.status(404).json({ message: "Repository not found!" });
+        }
+        console.log("Repository found:", repo);
+
+        // Ensure the user making the request is authorized
+        if (String(userId) !== String(user._id)) {
+            console.log("User is not authorized to star this repository");
+            return res.status(403).json({ message: "You are not authorized to star repositories for this user!" });
+        }
+        console.log("User is authorized to star the repository");
+
+        // Add the repository to the user's `starRepos` array if not already starred
+        if (!user.starRepos.includes(repo._id)) {
+            console.log("Starring the repository...");
+            await usersCollection.updateOne(
+                { username },
+                { $push: { starRepos: repo._id } }
+            );
+            console.log("Repository starred successfully.");
+        } else {
+            console.log("Repository already starred");
+        }
+
+        res.status(200).json({ message: "Repository starred successfully!" });
+    } catch (err) {
+        console.error("Error starring repository:", err.message);
+        if (err.name === "JsonWebTokenError") {
+            console.log("Invalid token error");
+            return res.status(401).json({ message: "Invalid token!" });
+        }
+        console.log("Unexpected error");
+        res.status(500).json({ message: "Server error!" });
+    }
+}
+
 module.exports = {
     getAllUsers,
     signup,
@@ -208,4 +282,5 @@ module.exports = {
     getUserProfile,
     updateUserProfile,
     deleteUserProfile,
+    starOrFollow,
 };
