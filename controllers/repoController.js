@@ -10,7 +10,24 @@ const dotenv = require("dotenv");
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 process.env.AWS_SDK_LOAD_CONFIG = "1";
 const apiUrl = process.env.API_URL;
+const jwt = require('jsonwebtoken');
 
+
+
+dotenv.config();
+const uri = process.env.MONGODB_URI;
+
+let client;
+
+async function connectClient() {
+    if(!client) {
+        client = new MongoClient(uri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        await client.connect();
+    }
+}
 
 async function createRepository(req, res) {
    const { owner, name, issues, content, description, visibility } = req.body;
