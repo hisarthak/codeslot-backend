@@ -15,7 +15,7 @@ repoRouter.get("/repo/user/:userID", repoController.fetchRepositoriesForCurrentU
 // Details for a specific repository
 repoRouter.get("/repo/user/details/:reponame/logs", repoController.fetchLogsFromS3);
 repoRouter.get("/repo/user/details/:reponame/file/:filePath", repoController.fetchFileContent); // Changed to explicitly use 'file'
-repoRouter.get("/repo/user/details/:reponame", repoController.repoFolderStructure);
+repoRouter.post("/repo/user/details/:reponame", repoController.repoFolderStructure);
 
 // Repository operations by ID
 repoRouter.get("/repo/:id", repoController.fetchRepositoryById);

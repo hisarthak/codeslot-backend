@@ -270,9 +270,70 @@ async function fetchAndProcessCommitDataFromS3(repoName, commitID) {
 // Route to handle requests for file system generation
 async function repoFolderStructure(req, res) {
   try {
-    const { reponame } = req.params; // Extract repoName from URL
-    const decodedRepoName = decodeURIComponent(reponame); // Decode URL-encoded repoName
-    const { commitID: queryCommitID } = req.query; // Extract commitID from query parameters
+  const { reponame } = req.params; // Extract reponame from params
+ const { token, username } = req.body; // Extract token and username from query params
+ const decodedRepoName = decodeURIComponent(reponame); // Decode reponame
+ const { commitID: queryCommitID } = req.query; // Extract commitID from query params
+
+ console.log("Processing request for repository folder structure:", {
+   reponame: decodedRepoName,
+   username,
+   token,
+   queryCommitID,
+ });
+
+ // Ensure all required parameters are present
+ if (!username || !token || !reponame) {
+   return res.status(400).json({ message: "Missing query parameters" });
+ }
+
+ // Verify JWT token
+ console.log("Verifying token...");
+ let decoded;
+ try {
+   decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+ } catch (err) {
+   console.error("Invalid token:", err.message);
+   return res.status(401).json({ message: "Invalid token!" });
+ }
+ const userId = decoded.id;
+
+ // Connect to the database
+ console.log("Connecting to database...");
+ await connectClient();
+ console.log("Connected to database successfully.");
+ const db = client.db("githubclone");
+ const usersCollection = db.collection("users");
+ const repositoriesCollection = db.collection("repositories");
+
+ // Validate the repository and user
+ console.log("Validating repository and user...");
+ const repo = await repositoriesCollection.findOne({ name: decodedRepoName });
+ if (!repo) {
+   console.log("Repository not found.");
+   return res.status(404).json({ message: "Repository not found!" });
+ }
+
+ const user = await usersCollection.findOne({ username });
+ if (!user) {
+   console.log("User not found.");
+   return res.status(404).json({ message: "User not found!" });
+ }
+
+ // Ensure username matches the first part of the repository name
+ const [repoOwner] = decodedRepoName.split("/");
+ if (repoOwner !== username) {
+   console.log("Username does not match repository owner.");
+   return res.status(403).json({ message: "Access forbidden!" });
+ }
+
+ // Check repository visibility and authorization
+ if (!repo.visibility && String(userId) !== String(user._id)) {
+   console.log("Repository is private, and user is not authorized.");
+   return res.status(403).json({ message: "You are not authorized to access this repository!" });
+ }
+
+
 
     let commitID, message = "", date = "", count = "";
 
