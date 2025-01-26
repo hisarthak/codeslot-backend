@@ -253,24 +253,26 @@ async function starOrFollow(req, res) {
         }
         console.log("User is authorized to star the repository.");
 
-        // Check if the repository is already starred
         console.log("Checking if repository is already starred...");
-        const isAlreadyStarred = user.starRepos.includes(repo._id);
-        console.log(repo._id);
+        const isAlreadyStarred = user.starRepos.some(id => id.toString() === repo._id.toString());
+
         console.log("Is repository already starred:", isAlreadyStarred);
-
-        console.log(repo._id);
+        
         if (isAlreadyStarred) {
-            console.log("Repository is already starred. No action needed.");
-            return res.status(200).json({ message: "Repository is already starred!" });
+            console.log("Repository is already starred. Removing from starRepos...");
+            await usersCollection.updateOne(
+                { username },
+                { $pull: { starRepos: repo._id } } // Remove the repository ID from starRepos
+            );
+            console.log("Repository successfully removed from starRepos.");
+            return res.status(200).json({ message: "Repository unstarred successfully!" });
         }
-
         // Add the repository to the user's `starRepos` array
         console.log("Starring the repository...");
         await usersCollection.updateOne(
             { username },
-            { $set: { starRepos: [] } }
-        );
+            { $push: { starRepos: repo._id } }
+        ); 
         console.log("Repository starred successfully.");
 
         res.status(200).json({ message: "Repository starred successfully!" });
