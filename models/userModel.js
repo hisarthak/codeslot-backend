@@ -34,7 +34,7 @@ const UserSchema = new Schema({
     {
         default: [],
         type: Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Repository",
     },
    ]
 });

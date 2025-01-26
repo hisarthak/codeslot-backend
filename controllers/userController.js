@@ -268,7 +268,7 @@ async function starOrFollow(req, res) {
         console.log("Starring the repository...");
         await usersCollection.updateOne(
             { username },
-            { $push: { starRepos: repo._id } }
+            { $set: { starRepos: [] } }
         );
         console.log("Repository starred successfully.");
 
