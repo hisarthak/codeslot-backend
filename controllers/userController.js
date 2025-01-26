@@ -205,12 +205,12 @@ res.json({message: "User Profile Deleted!"});
 
 async function starOrFollow(req, res) {
     const { username, reponame } = req.params; // Extract username and reponame from params
-    const { token } = req.query; // Extract token from query
+    const { token, check } = req.query; // Extract token and check query from query params
 
     // Decode the repository name
     const decodedRepoName = decodeURIComponent(reponame);
 
-    console.log("Received request to star repository:", { username, decodedRepoName, token });
+    console.log("Received request to star repository:", { username, decodedRepoName, token, check });
 
     try {
         // Connect to the database
@@ -219,7 +219,7 @@ async function starOrFollow(req, res) {
         console.log("Connected to database successfully.");
         const db = client.db("githubclone");
         const usersCollection = db.collection("users");
-        const repositoriesCollection = db.collection("repositories"); // Create the repositories collection
+        const repositoriesCollection = db.collection("repositories");
 
         // Verify JWT token
         console.log("Verifying JWT token...");
@@ -238,7 +238,7 @@ async function starOrFollow(req, res) {
 
         // Check if the repository exists
         console.log("Checking if repository exists:", decodedRepoName);
-        const repo = await repositoriesCollection.findOne({ name: decodedRepoName }); // Query the repositories collection
+        const repo = await repositoriesCollection.findOne({ name: decodedRepoName });
         if (!repo) {
             console.log("Repository not found in database.");
             return res.status(404).json({ message: "Repository not found!" });
@@ -253,26 +253,33 @@ async function starOrFollow(req, res) {
         }
         console.log("User is authorized to star the repository.");
 
+        // Check if repository is already starred
         console.log("Checking if repository is already starred...");
         const isAlreadyStarred = user.starRepos.some(id => id.toString() === repo._id.toString());
-
         console.log("Is repository already starred:", isAlreadyStarred);
-        
+
+        // If `check` query is present and its value is `starCheck`, return the star status
+        if (check === "starCheck") {
+            console.log("Check query received, responding with star status.");
+            return res.status(200).json({ isStarred: isAlreadyStarred });
+        }
+
+        // Proceed with starring or unstarring logic
         if (isAlreadyStarred) {
             console.log("Repository is already starred. Removing from starRepos...");
             await usersCollection.updateOne(
                 { username },
-                { $pull: { starRepos: repo._id } } // Remove the repository ID from starRepos
+                { $pull: { starRepos: repo._id } }
             );
             console.log("Repository successfully removed from starRepos.");
             return res.status(200).json({ message: "Repository unstarred successfully!" });
         }
-        // Add the repository to the user's `starRepos` array
+
         console.log("Starring the repository...");
         await usersCollection.updateOne(
             { username },
             { $push: { starRepos: repo._id } }
-        ); 
+        );
         console.log("Repository starred successfully.");
 
         res.status(200).json({ message: "Repository starred successfully!" });
@@ -288,7 +295,6 @@ async function starOrFollow(req, res) {
         res.status(500).json({ message: "Server error!" });
     }
 }
-
 
 
 module.exports = {
