@@ -11,6 +11,8 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 process.env.AWS_SDK_LOAD_CONFIG = "1";
 const apiUrl = process.env.API_URL;
 const jwt = require('jsonwebtoken');
+const { MongoClient } = require("mongodb");
+var ObjectId = require("mongodb").ObjectId;
 
 
 
