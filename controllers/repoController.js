@@ -334,7 +334,7 @@ async function repoFolderStructure(req, res) {
  }
  const [repoOwner] = decodedRepoName.split("/");
  console.log(repoOwner);
- const user = await usersCollection.findOne({ repoOwner });
+ const user = await usersCollection.findOne({ username: repoOwner });
  if (!user) {
    console.log("User not found.");
    return res.status(404).json({ message: "User not found!" });
