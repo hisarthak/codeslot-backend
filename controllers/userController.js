@@ -256,6 +256,7 @@ async function starOrFollow(req, res) {
         // Check if the repository is already starred
         console.log("Checking if repository is already starred...");
         const isAlreadyStarred = user.starRepos.includes(repo._id);
+        console.log(repo._id);
         console.log("Is repository already starred:", isAlreadyStarred);
 
         console.log(repo._id);
