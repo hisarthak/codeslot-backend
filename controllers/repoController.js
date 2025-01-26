@@ -297,7 +297,6 @@ async function repoFolderStructure(req, res) {
  console.log("Processing request for repository folder structure:", {
    reponame: decodedRepoName,
    username,
-   token,
    queryCommitID,
    check
  });
@@ -340,6 +339,8 @@ async function repoFolderStructure(req, res) {
    return res.status(404).json({ message: "User not found!" });
  }
 
+ console.log(userId);
+ console.log(user._id);
  // If the "check" query is present and its value is "access"
  if (check === "access") {
   const isAccessible = repo.visibility || String(userId) === String(user._id);
