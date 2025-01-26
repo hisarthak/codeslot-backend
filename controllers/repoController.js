@@ -292,13 +292,14 @@ async function repoFolderStructure(req, res) {
   const { reponame } = req.params; // Extract reponame from params
  const { token, username } = req.body; // Extract token and username from query params
  const decodedRepoName = decodeURIComponent(reponame); // Decode reponame
- const { commitID: queryCommitID } = req.query; // Extract commitID from query params
+ const { commitID: queryCommitID, check  } = req.query; // Extract commitID from query params
 
  console.log("Processing request for repository folder structure:", {
    reponame: decodedRepoName,
    username,
    token,
    queryCommitID,
+   check
  });
 
  // Ensure all required parameters are present
@@ -339,12 +340,12 @@ async function repoFolderStructure(req, res) {
    return res.status(404).json({ message: "User not found!" });
  }
 
- // Ensure username matches the first part of the repository name
- const [repoOwner] = decodedRepoName.split("/");
- if (repoOwner !== username) {
-   console.log("Username does not match repository owner.");
-   return res.status(403).json({ message: "Access forbidden!" });
- }
+ // If the "check" query is present and its value is "access"
+ if (check === "access") {
+  const isAccessible = repo.visibility || String(userId) === String(user._id);
+  console.log("Repository visibility check:", isAccessible);
+  return res.status(200).json({ isAccessible });
+}
 
  // Check repository visibility and authorization
  if (!repo.visibility && String(userId) !== String(user._id)) {
