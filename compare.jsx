@@ -1,10 +1,28 @@
-<div className='the-suggested-repo'>
+<div className="hr-line-box" key={repo._id}>
 <div className="repo-name-link">
-<p style={{ color: "#74b9ff", display: "flex", fontWeight: "500"}}>
-<div className="the-suggested-repo-user">S</div><div  className='repo-main-info'><div  className='suggested-repo-name'>codeslot/hi</div>
-<p className="suggested-repo-desc" >This is a repo...</p>
-          
+  <div className="repo-main-info">
+    <div
+      className="profile-repo-name-underline"
+      onClick={() => navigate(`/${repo.name}`)}
+    >
+      <p
+        style={{
+          color: "#74b9ff",
+          display: "flex",
+          fontWeight: "500",
+          fontSize: "18px",
+          margin: "0",
+        }}
+      >
+        {repo.name}
+      </p>
+    </div>
+    <p className="profile-repo-desc">
+      {repo.description &&
+      repo.description.length > 50
+        ? repo.description.substring(0, 100) + "..."
+        : repo.description}
+    </p>
+  </div>
 </div>
-</p>
-</div>                          
 </div>

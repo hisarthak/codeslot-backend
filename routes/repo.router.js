@@ -10,7 +10,7 @@ repoRouter.get("/repo/search", repoController.findUsersAndRepositories);
 
 // Specific repository routes
 repoRouter.get("/repo/name/:name", repoController.fetchRepositoryByName);
-repoRouter.get("/repo/user/:userID", repoController.fetchRepositoriesForCurrentUser);
+repoRouter.get("/repo/user/:username", repoController.fetchRepositoriesForCurrentUser);
 
 // Details for a specific repository
 repoRouter.get("/repo/user/details/:reponame/logs", repoController.fetchLogsFromS3);

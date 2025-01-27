@@ -119,69 +119,104 @@ async function getAllUsers (req,res){
 
 
 
+
 async function getUserProfile(req, res) {
-  const currentID = req.params.id;
-  const { type } = req.query; // Extract the query parameter
-
-  console.log("Received request for user profile");
-  console.log("Current User ID:", currentID);
-  console.log("Query Type:", type);
-
-  try {
-
-
-    // Fetch the user by ID using Mongoose (which supports .populate())
-    const user = await User.findById(currentID);
-
-    console.log("Fetched User:", user);
-
-    if (!user) {
-      console.log("User not found.");
-      return res.status(404).json({ message: "User not found" });
+    const { username } = req.params; // Get the username from the params
+    const { type, token } = req.query; // Extract the type (star, following, etc.) and token from query params
+  
+    console.log("Received request for user profile");
+    console.log("Username from Params:", username);
+    console.log("Query Type:", type);
+  
+    try {
+      // Verify the token
+      if (!token) {
+        return res.status(400).json({ message: "Token is required" });
+      }
+  
+      // Decode the token to get the current user's username
+      let decoded;
+      try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET); // Replace with your JWT secret
+      } catch (err) {
+        console.error("Token verification failed:", err.message);
+        return res.status(401).json({ message: "Invalid or expired token" });
+      }
+  
+      const currentUsername = decoded.username; // Extract the username from the token
+  
+      console.log("Decoded Username from Token:", currentUsername);
+  
+      // Fetch the user by username
+      const user = await User.findOne({ username });
+  
+      console.log("Fetched User:", user);
+  
+      if (!user) {
+        console.log("User not found.");
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      // Check if the current user is the one requesting their profile
+      const isOwnProfile = currentUsername === username;
+  
+      // Handle query for starred repositories
+      if (type === "star") {
+        console.log("Fetching starred repositories...");
+  
+        let starRepos = [];
+  
+        // If it's the user's own profile, send all starred repos
+        if (isOwnProfile) {
+          starRepos = user.starRepos; // All starred repositories
+        } else {
+          // If it's another user's profile, filter by visibility
+          starRepos = user.starRepos.filter((repo) => repo.visibility === "true");
+        }
+  
+        // Populate repository details using populate() for starred repositories
+        const populatedStarRepos = await User.findOne({ username })
+          .populate({
+            path: "starRepos", // Field to populate
+            match: isOwnProfile ? {} : { visibility: "true" }, // Filter starred repositories by visibility for non-own profiles
+            select: "name description visibility", // Fields to select for populated repositories
+          })
+          .select("starRepos"); // Select the starRepos field only
+  
+        console.log("Populated Starred Repositories:", populatedStarRepos.starRepos);
+        return res.json(populatedStarRepos.starRepos); // Return populated or filtered star repositories
+      }
+  
+      // Handle query for followed users
+      if (type === "following") {
+        console.log("Fetching followed users...");
+        const followedUsers = await User.findOne({ username })
+          .populate("followedUsers") // Populate the followedUsers field
+          .select("followedUsers");
+  
+        console.log("Followed Users:", followedUsers.followedUsers);
+        return res.json(followedUsers.followedUsers); // Return followed users
+      }
+  
+      // Handle query for followers
+      if (type === "followers") {
+        console.log("Fetching followers...");
+        const followers = await User.findOne({ username })
+          .populate("followers") // Populate the followers field
+          .select("followers");
+  
+        console.log("Followers:", followers.followers);
+        return res.json(followers.followers); // Return followers
+      }
+  
+      // Default behavior: Return the entire user object
+      console.log("Returning full user object.");
+      res.json(user);
+    } catch (err) {
+      console.error("Error during fetching:", err.message);
+      res.status(500).send("Server error!");
     }
-
-    // Handle query for starred repositories
-    if (type === "star") {
-      console.log("Fetching starred repositories...");
-      const userWithStarRepos = await User.findById(currentID)
-        .populate("starRepos") // Populate the `starRepos` field
-        .select("starRepos"); // Select only the `starRepos` field
-
-      console.log("Starred Repositories:", userWithStarRepos.starRepos);
-      return res.json(userWithStarRepos.starRepos); // Return the populated star repositories
-    }
-
-    // Handle query for followed users
-    if (type === "following") {
-      console.log("Fetching followed users...");
-      const followedUsers = await User.findById(currentID)
-        .populate("followedUsers") // Populate the `followedUsers` field
-        .select("followedUsers");
-
-      console.log("Followed Users:", followedUsers.followedUsers);
-      return res.json(followedUsers.followedUsers); // Return only the followed users
-    }
-
-    // Handle query for followers
-    if (type === "followers") {
-      console.log("Fetching followers...");
-      const followers = await User.findById(currentID)
-        .populate("followers") // Populate the `followers` field
-        .select("followers");
-
-      console.log("Followers:", followers.followers);
-      return res.json(followers.followers); // Return only the followers
-    }
-
-    // Default behavior: Return the entire user object
-    console.log("Returning full user object.");
-    res.json(user);
-  } catch (err) {
-    console.error("Error during fetching:", err.message);
-    res.status(500).send("Server error!");
   }
-}
-
 
 async function updateUserProfile(req,res){
     const currentID = req.params.id;
