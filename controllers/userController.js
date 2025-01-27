@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 const { MongoClient } = require("mongodb");
 const dotenv = require("dotenv");
 var ObjectId = require("mongodb").ObjectId;
+const mongoose = require ('mongoose');
+
 const Repository = require("../models/repoModel");
 
 const User = require("../models/userModel");
@@ -126,14 +128,7 @@ async function getUserProfile(req, res) {
   console.log("Query Type:", type);
 
   try {
-    // Connect to the database using Mongoose
-    console.log("Connecting to MongoDB...");
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
 
-    console.log("Connected to the database. Fetching user...");
 
     // Fetch the user by ID using Mongoose (which supports .populate())
     const user = await User.findById(currentID);
