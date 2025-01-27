@@ -226,7 +226,7 @@ async function toggleVisibilityById(req, res){
    const updatedRepository = await repository.save();
   
    res.json({
-      message:"Repository visibility toggled successfully", repository: updatedRepository,
+      message:"Repository visibility toggled successfully", visibility: updatedRepository.visibility,
    });
     }catch(err){
        console.error("Error during toggling visibility : ", err.message);
