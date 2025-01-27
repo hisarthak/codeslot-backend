@@ -32,7 +32,7 @@ async function connectClient() {
 }
 
 async function createRepository(req, res) {
-   const { owner, name, issues, content, description, visibility } = req.body;
+   const { username, owner, name, issues, content, description, visibility } = req.body;
 
    try {
        // Normalize and trim repository name
@@ -51,16 +51,6 @@ async function createRepository(req, res) {
                 error: "Repository name must contain at least one letter, and hyphens cannot be at the start or end."
             });
         }
-
-       // Fetch the username using the owner ID
-       let username;
-       try {
-           const response = await axios.get(`https://${apiUrl}/userProfile/${owner}`);
-           username = response.data.username; // Set the username
-       } catch (err) {
-           console.error("Cannot fetch user details: ", err);
-           return res.status(500).json({ error: "Unable to fetch user details." });
-       }
 
        // Append the username to the trimmed repository name
        trimmedName = `${username}/${trimmedName}`;
