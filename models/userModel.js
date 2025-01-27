@@ -2,41 +2,47 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const UserSchema = new Schema({
-   username: {
+  username: {
     type: String,
     required: true,
     unique: true,
-   },
-   email: {
+  },
+  email: {
     type: String,
     required: true,
     unique: true,
-   },
-   password: {
+  },
+  password: {
     type: String,
-   },
-   repositories: [
+  },
+  repositories: [
     {
-        default: [],
-        type: Schema.Types.ObjectId,
-        ref: "Repository",
+      default: [],
+      type: Schema.Types.ObjectId,
+      ref: "Repository",
     },
-   ],
-
-   followedUsers: [
+  ],
+  followedUsers: [
     {
-        default: [],
-        type: Schema.Types.ObjectId,
-        ref: "User",
+      default: [],
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
-   ],
-   starRepos: [
+  ],
+  starRepos: [
     {
-        default: [],
-        type: Schema.Types.ObjectId,
-        ref: "Repository",
+      default: [],
+      type: Schema.Types.ObjectId,
+      ref: "Repository",
     },
-   ]
+  ],
+  followers: [
+    {
+      default: [],
+      type: Schema.Types.ObjectId,
+      ref: "User", // Reference to the `User` model for followers
+    },
+  ],
 });
 
 const User = mongoose.model("User", UserSchema);
