@@ -4,7 +4,6 @@ const { MongoClient } = require("mongodb");
 const dotenv = require("dotenv");
 var ObjectId = require("mongodb").ObjectId;
 const mongoose = require ('mongoose');
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const Repository = require("../models/repoModel");
 
 const User = require("../models/userModel");
