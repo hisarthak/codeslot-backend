@@ -212,27 +212,39 @@ async function updateRepositoryById(req, res){
     }
 };
 
-async function toggleVisibilityById(req, res){
-    const {id} = req.params;
-    
-    try{
-   const repository = await Repository.findById(id);
-   if(!repository){
-      return res.status(404).json({error: "Repository not found"});
-   }
-  
-  repository.visibility = !repository.visibility;
-  
-   const updatedRepository = await repository.save();
-  
-   res.json({
-      message:"Repository visibility toggled successfully", visibility: updatedRepository.visibility,
-   });
-    }catch(err){
-       console.error("Error during toggling visibility : ", err.message);
-       res.status(500).send("Server error");
-      }
-    };
+async function toggleVisibilityById(req, res) {
+  const { id } = req.params;
+  const { userId } = req.query; // Extract userId from query
+
+  try {
+    const repository = await Repository.findById(id);
+
+    // Check if repository exists
+    if (!repository) {
+      return res.status(404).json({ error: "Repository not found" });
+    }
+
+    // Verify if the repository belongs to the user
+    if (repository.owner.toString() !== userId) {
+      return res.status(403).json({ error: "Unauthorized: You do not own this repository" });
+    }
+
+    // Toggle visibility
+    repository.visibility = !repository.visibility;
+
+    const updatedRepository = await repository.save();
+
+    // Send success response
+    res.json({
+      message: "Repository visibility toggled successfully",
+      visibility: updatedRepository.visibility,
+    });
+  } catch (err) {
+    console.error("Error during toggling visibility: ", err.message);
+    res.status(500).send("Server error");
+  }
+}
+
 
 async function deleteRepositoryById(req, res){
     const {id} = req.params;
