@@ -4,7 +4,7 @@ const { MongoClient } = require("mongodb");
 const dotenv = require("dotenv");
 var ObjectId = require("mongodb").ObjectId;
 const mongoose = require ('mongoose');
-
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const Repository = require("../models/repoModel");
 
 const User = require("../models/userModel");
@@ -137,7 +137,7 @@ async function getUserProfile(req, res) {
       // Decode the token to get the current user's username
       let decoded;
       try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET); // Replace with your JWT secret
+        decoded = jwt.verify(token, process.env.JWT_SECRET_KEY); // Replace with your JWT secret
       } catch (err) {
         console.error("Token verification failed:", err.message);
         return res.status(401).json({ message: "Invalid or expired token" });
