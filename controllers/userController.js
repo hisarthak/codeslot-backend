@@ -3,6 +3,9 @@ const bcrypt = require('bcryptjs');
 const { MongoClient } = require("mongodb");
 const dotenv = require("dotenv");
 var ObjectId = require("mongodb").ObjectId;
+const Repository = require("../models/repoModel");
+
+const User = require("../models/userModel");
 
 
 dotenv.config();
@@ -112,75 +115,78 @@ async function getAllUsers (req,res){
     }
 };
 
+
+
 async function getUserProfile(req, res) {
-    const currentID = req.params.id;
-    const { type } = req.query; // Extract the query parameter
-  
-    console.log("Received request for user profile");
-    console.log("Current User ID:", currentID);
-    console.log("Query Type:", type);
-  
-    try {
-      // Connect to the database
-      console.log("Connecting to MongoDB...");
-      await connectClient();
-      const db = client.db("githubclone");
-      const usersCollection = db.collection("users");
-  
-      console.log("Connected to the database. Fetching user...");
-  
-      // Fetch the user by ID
-      const user = await usersCollection.findOne({ _id: new ObjectId(currentID) });
-  
-      console.log("Fetched User:", user);
-  
-      if (!user) {
-        console.log("User not found.");
-        return res.status(404).json({ message: "User not found" });
-      }
-  
-      // Handle query for starred repositories
-      if (type === "star") {
-        console.log("Fetching starred repositories...");
-        const starredRepositories = await usersCollection.findOne(
-          { _id: new ObjectId(currentID) },
-          { projection: { starRepos: 1 } }
-        );
-        console.log("Starred Repositories:", starredRepositories?.starRepos || []);
-        return res.json(starredRepositories?.starRepos || []); // Return only the starred repositories
-      }
-  
-      // Handle query for followed users
-      if (type === "following") {
-        console.log("Fetching followed users...");
-        const followedUsers = await usersCollection.findOne(
-          { _id: new ObjectId(currentID) },
-          { projection: { followedUsers: 1 } }
-        );
-        console.log("Followed Users:", followedUsers?.followedUsers || []);
-        return res.json(followedUsers?.followedUsers || []); // Return only the followed users
-      }
-  
-      // Handle query for followers
-      if (type === "followers") {
-        console.log("Fetching followers...");
-        const followers = await usersCollection.findOne(
-          { _id: new ObjectId(currentID) },
-          { projection: { followers: 1 } }
-        );
-        console.log("Followers:", followers?.followers || []);
-        return res.json(followers?.followers || []); // Return only the followers
-      }
-  
-      // Default behavior: Return the entire user object
-      console.log("Returning full user object.");
-      res.json(user);
-    } catch (err) {
-      console.error("Error during fetching:", err.message);
-      res.status(500).send("Server error!");
+  const currentID = req.params.id;
+  const { type } = req.query; // Extract the query parameter
+
+  console.log("Received request for user profile");
+  console.log("Current User ID:", currentID);
+  console.log("Query Type:", type);
+
+  try {
+    // Connect to the database using Mongoose
+    console.log("Connecting to MongoDB...");
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    console.log("Connected to the database. Fetching user...");
+
+    // Fetch the user by ID using Mongoose (which supports .populate())
+    const user = await User.findById(currentID);
+
+    console.log("Fetched User:", user);
+
+    if (!user) {
+      console.log("User not found.");
+      return res.status(404).json({ message: "User not found" });
     }
+
+    // Handle query for starred repositories
+    if (type === "star") {
+      console.log("Fetching starred repositories...");
+      const userWithStarRepos = await User.findById(currentID)
+        .populate("starRepos") // Populate the `starRepos` field
+        .select("starRepos"); // Select only the `starRepos` field
+
+      console.log("Starred Repositories:", userWithStarRepos.starRepos);
+      return res.json(userWithStarRepos.starRepos); // Return the populated star repositories
+    }
+
+    // Handle query for followed users
+    if (type === "following") {
+      console.log("Fetching followed users...");
+      const followedUsers = await User.findById(currentID)
+        .populate("followedUsers") // Populate the `followedUsers` field
+        .select("followedUsers");
+
+      console.log("Followed Users:", followedUsers.followedUsers);
+      return res.json(followedUsers.followedUsers); // Return only the followed users
+    }
+
+    // Handle query for followers
+    if (type === "followers") {
+      console.log("Fetching followers...");
+      const followers = await User.findById(currentID)
+        .populate("followers") // Populate the `followers` field
+        .select("followers");
+
+      console.log("Followers:", followers.followers);
+      return res.json(followers.followers); // Return only the followers
+    }
+
+    // Default behavior: Return the entire user object
+    console.log("Returning full user object.");
+    res.json(user);
+  } catch (err) {
+    console.error("Error during fetching:", err.message);
+    res.status(500).send("Server error!");
   }
-  
+}
+
 
 async function updateUserProfile(req,res){
     const currentID = req.params.id;
