@@ -341,7 +341,11 @@ async function starOrFollow(req, res) {
         // If `check` query is present and its value is `starCheck`, return the star status
         if (check === "starCheck") {
             // console.log("Check query received, responding with star status.");
-            return res.status(200).json({ isStarred: isAlreadyStarred });
+            return res.status(200).json({
+                isStarred: isAlreadyStarred,
+                repo_id: repo._id, // Include repository ID
+                visibility: repo.visibility 
+                 });
         }
 
         // Proceed with starring or unstarring logic
