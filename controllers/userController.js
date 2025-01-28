@@ -378,6 +378,77 @@ async function starOrFollow(req, res) {
 }
 
 
+async function followOrUnfollowUser(req, res) {
+    const { id } = req.params; // Extract userId from the params
+    const { followUsername } = req.query; // Extract followUsername from the query
+  
+    try {
+      // Check if `followUsername` is provided
+      if (!followUsername) {
+        return res.status(400).json({ message: "followUsername is required!" });
+      }
+  
+      // Fetch the user initiating the follow/unfollow action
+      const currentUser = await User.findById(id);
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found!" });
+      }
+  
+      // Fetch the user to be followed/unfollowed
+      const userToFollow = await User.findOne({ username: followUsername });
+      if (!userToFollow) {
+        return res.status(404).json({ message: "User to follow not found!" });
+      }
+  
+      // Check if the user is already following
+      const alreadyFollowing = currentUser.followedUsers.some(
+        (id) => id.toString() === userToFollow._id.toString()
+      );
+  
+      if (alreadyFollowing) {
+        // Unfollow logic: Remove `userToFollow` from `currentUser.followedUsers`
+        currentUser.followedUsers = currentUser.followedUsers.filter(
+          (id) => id.toString() !== userToFollow._id.toString()
+        );
+  
+        // Remove `currentUser` from `userToFollow.followers`
+        userToFollow.followers = userToFollow.followers.filter(
+          (id) => id.toString() !== currentUser._id.toString()
+        );
+  
+        // Save changes to both users
+        await currentUser.save();
+        await userToFollow.save();
+  
+        return res.status(200).json({
+          message: "Successfully unfollowed the user!",
+          currentUser: currentUser.username,
+          unfollowedUser: userToFollow.username,
+        });
+      }
+  
+      // Follow logic: Add `userToFollow` to `currentUser.followedUsers`
+      currentUser.followedUsers.push(userToFollow._id);
+  
+      // Add `currentUser` to `userToFollow.followers`
+      userToFollow.followers.push(currentUser._id);
+  
+      // Save changes to both users
+      await currentUser.save();
+      await userToFollow.save();
+  
+      res.status(200).json({
+        message: "Successfully followed the user!",
+        currentUser: currentUser.username,
+        followedUser: userToFollow.username,
+      });
+    } catch (err) {
+      console.error("Error in followOrUnfollowUser:", err.message);
+      res.status(500).json({ message: "Server error!" });
+    }
+  }
+
+
 module.exports = {
     getAllUsers,
     signup,
@@ -386,4 +457,5 @@ module.exports = {
     updateUserProfile,
     deleteUserProfile,
     starOrFollow,
+    followOrUnfollowUser,
 };
