@@ -290,96 +290,79 @@ async function starOrFollow(req, res) {
     // Decode the repository name
     const decodedRepoName = decodeURIComponent(reponame);
 
-    // console.log("Received request to star repository:", { username, decodedRepoName, token, check });
-
     try {
         // Connect to the database
-        // console.log("Connecting to database...");
         await connectClient();
-        // console.log("Connected to database successfully.");
         const db = client.db("githubclone");
         const usersCollection = db.collection("users");
         const repositoriesCollection = db.collection("repositories");
 
         // Verify JWT token
-        // console.log("Verifying JWT token...");
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
         const userId = decoded.id;
-        // console.log("Decoded user ID from JWT:", userId);
 
         // Find the user by username
-        // console.log("Finding user by username:", username);
         const user = await usersCollection.findOne({ username });
         if (!user) {
-            // console.log("User not found in database.");
             return res.status(404).json({ message: "User not found!" });
         }
-        // console.log("User found:", user);
 
         // Check if the repository exists
-        // console.log("Checking if repository exists:", decodedRepoName);
         const repo = await repositoriesCollection.findOne({ name: decodedRepoName });
         if (!repo) {
-            // console.log("Repository not found in database.");
             return res.status(404).json({ message: "Repository not found!" });
         }
-        // console.log("Repository found:", repo);
 
         // Ensure the user making the request is authorized
-        // console.log("Checking user authorization...");
         if (String(userId) !== String(user._id)) {
-            // console.log("User is not authorized to star this repository.");
             return res.status(403).json({ message: "You are not authorized to star repositories for this user!" });
         }
-        // console.log("User is authorized to star the repository.");
 
-        // Check if repository is already starred
-        // console.log("Checking if repository is already starred...");
+        // Check if repository is already starred by the user
         const isAlreadyStarred = user.starRepos.some(id => id.toString() === repo._id.toString());
-        // console.log("Is repository already starred:", isAlreadyStarred);
 
         // If `check` query is present and its value is `starCheck`, return the star status
         if (check === "starCheck") {
-            // console.log("Check query received, responding with star status.");
             return res.status(200).json({
                 isStarred: isAlreadyStarred,
-                repo_id: repo._id, // Include repository ID
-                visibility: repo.visibility 
-                 });
+                repo_id: repo._id,
+                visibility: repo.visibility,
+            });
         }
 
         // Proceed with starring or unstarring logic
         if (isAlreadyStarred) {
-            // console.log("Repository is already starred. Removing from starRepos...");
+            // Unstar repository
             await usersCollection.updateOne(
                 { username },
                 { $pull: { starRepos: repo._id } }
             );
-            // console.log("Repository successfully removed from starRepos.");
+            await repositoriesCollection.updateOne(
+                { name: decodedRepoName },
+                { $pull: { starredBy: username } } // Remove username from `starredBy` array
+            );
             return res.status(200).json({ message: "Repository unstarred successfully!" });
         }
 
-        // console.log("Starring the repository...");
+        // Star repository
         await usersCollection.updateOne(
             { username },
             { $push: { starRepos: repo._id } }
         );
-        // console.log("Repository starred successfully.");
+        await repositoriesCollection.updateOne(
+            { name: decodedRepoName },
+            { $push: { starredBy: username } } // Add username to `starredBy` array
+        );
 
         res.status(200).json({ message: "Repository starred successfully!" });
     } catch (err) {
-        // console.error("Error starring repository:", err.message);
-
         if (err.name === "JsonWebTokenError") {
-            // console.log("Invalid JWT token provided.");
             return res.status(401).json({ message: "Invalid token!" });
         }
 
-        // console.log("Unexpected error occurred.");
         res.status(500).json({ message: "Server error!" });
     }
 }
-
 
 async function followOrUnfollowUser(req, res) {
     const { id } = req.params; // Extract userId from the params

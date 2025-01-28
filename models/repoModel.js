@@ -30,10 +30,15 @@ const RepositorySchema = new Schema(
         ref: "Issue",
       },
     ],
+    // New field to store usernames of users who starred the repository
+    starredBy: [
+      {
+        type: String, // Store usernames directly as strings
+      },
+    ],
   },
+  { timestamps: true } // Automatically manage createdAt and updatedAt fields
 );
-
-
 
 const Repository = mongoose.model("Repository", RepositorySchema);
 
