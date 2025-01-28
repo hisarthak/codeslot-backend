@@ -116,6 +116,7 @@ async function getAllUsers (req,res){
     }
 };
 
+
 async function getUserProfile(req, res) {
     const { username } = req.params; // Get the username from the params
     const { type, userId } = req.query; // Extract the type (star, following, etc.) and userId from query params
@@ -206,6 +207,8 @@ async function getUserProfile(req, res) {
   
       // Default behavior: Return the entire user object
       console.log("Returning full user object.");
+      await targetUser.populate("followers", "username email");
+      await targetUser.populate("followedUsers", "username email"); 
       res.json(targetUser);
     } catch (err) {
       console.error("Error during fetching:", err.message);
