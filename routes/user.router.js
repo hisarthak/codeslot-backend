@@ -12,6 +12,6 @@ userRouter.delete("/deleteProfile/:id", userController.deleteUserProfile);
 
 // New route for starring or following repositories or users
 userRouter.get("/starProfile/:username/:reponame", userController.starOrFollow);
-userRouter.get("/followProfile/:followUsername", userController.followOrUnfollowUser)
+userRouter.get("/followProfile/:id", userController.followOrUnfollowUser)
 
 module.exports = userRouter;
