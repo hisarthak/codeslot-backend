@@ -187,28 +187,35 @@ async function fetchRepositoriesForCurrentUser(req, res) {
     res.status(500).send("Server error");
   }
 }
-
-
 async function updateRepositoryByRepoName(req, res) {
   const { repoName } = req.params; // Extract repoName from params
   const { description } = req.body; // Extract description from body
   const { userId } = req.query; // Extract userId from query
   const decodedRepoName = decodeURIComponent(repoName);
-  try {
-    // Validate the input
-    if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
-    }
 
+  try {
     // Find the repository by its name
     const repository = await Repository.findOne({ name: decodedRepoName });
     if (!repository) {
       return res.status(404).json({ error: "Repository not found" });
     }
 
+    // If userId is not provided, return the current description
+    if (!userId) {
+      return res.json({
+        message: "User ID not provided. Returning current description.",
+        description: repository.description,
+      });
+    }
+
     // Verify that the userId matches the repository's owner
     if (repository.owner.toString() !== userId) {
       return res.status(403).json({ error: "Unauthorized: You do not own this repository" });
+    }
+
+    // Check if description exceeds 130 characters
+    if (description.length > 130) {
+      return res.status(400).json({ error: "Description cannot exceed 130 characters." });
     }
 
     // Update the description
@@ -219,15 +226,13 @@ async function updateRepositoryByRepoName(req, res) {
 
     res.json({
       message: "Repository updated successfully!",
-      repository: updatedRepository,
+      repository: updatedRepository.description,
     });
   } catch (err) {
     console.error("Error during updating repository: ", err.message);
     res.status(500).send("Server error");
   }
 }
-
-module.exports = updateRepositoryByRepoName;
 
 
 async function toggleVisibilityById(req, res) {
