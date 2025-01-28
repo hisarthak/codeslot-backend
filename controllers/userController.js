@@ -126,6 +126,7 @@ async function getUserProfile(req, res) {
     console.log("Received request for user profile");
     console.log("Username from Params:", username);
     console.log("Query Type:", type);
+    console.log(token);
   
     try {
       // Verify the token
@@ -139,8 +140,10 @@ async function getUserProfile(req, res) {
         decoded = jwt.verify(token, process.env.JWT_SECRET_KEY); // Replace with your JWT secret
       } catch (err) {
         console.error("Token verification failed:", err.message);
-        return res.status(401).json({ message: "Invalid or expired token" });
+        return res.status(401).json({ message: "Invalid or expired token" })
       }
+
+      console.log(decoded);
   
       const currentUsername = decoded.username; // Extract the username from the token
   
