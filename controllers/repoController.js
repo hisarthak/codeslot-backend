@@ -193,7 +193,7 @@ async function updateRepositoryByRepoName(req, res) {
   const { repoName } = req.params; // Extract repoName from params
   const { description } = req.body; // Extract description from body
   const { userId } = req.query; // Extract userId from query
-
+  const decodedRepoName = decodeURIComponent(repoName);
   try {
     // Validate the input
     if (!userId) {
@@ -201,7 +201,7 @@ async function updateRepositoryByRepoName(req, res) {
     }
 
     // Find the repository by its name
-    const repository = await Repository.findOne({ name: repoName });
+    const repository = await Repository.findOne({ name: decodedRepoName });
     if (!repository) {
       return res.status(404).json({ error: "Repository not found" });
     }
