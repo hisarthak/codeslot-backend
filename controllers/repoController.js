@@ -188,8 +188,6 @@ async function fetchRepositoriesForCurrentUser(req, res) {
   }
 }
 
-const mongoose = require("mongoose");
-const Repository = require("./models/Repository"); // Adjust the path to your model
 
 async function updateRepositoryByRepoName(req, res) {
   const { repoName } = req.params; // Extract repoName from params
