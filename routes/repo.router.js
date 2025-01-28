@@ -19,7 +19,7 @@ repoRouter.post("/repo/user/details/:reponame", repoController.repoFolderStructu
 
 // Repository operations by ID
 repoRouter.get("/repo/:id", repoController.fetchRepositoryById);
-repoRouter.put("/repo/update/:id", repoController.updateRepositoryById);
+repoRouter.put("/repo/update/:repoName", repoController.updateRepositoryByRepoName);
 repoRouter.delete("/repo/delete/:id", repoController.deleteRepositoryById);
 repoRouter.patch("/repo/toggle/:id", repoController.toggleVisibilityById);
 
