@@ -116,46 +116,39 @@ async function getAllUsers (req,res){
     }
 };
 
-
-
-
 async function getUserProfile(req, res) {
     const { username } = req.params; // Get the username from the params
-    const { type, token } = req.query; // Extract the type (star, following, etc.) and token from query params
+    const { type, userId } = req.query; // Extract the type (star, following, etc.) and userId from query params
   
     console.log("Received request for user profile");
     console.log("Username from Params:", username);
     console.log("Query Type:", type);
-    console.log(token);
+    console.log("UserID from Query:", userId);
   
     try {
-      // Verify the token
-      if (!token) {
-        return res.status(400).json({ message: "Token is required" });
+      // Verify the userId
+      if (!userId) {
+        return res.status(400).json({ message: "userId is required" });
       }
   
-      // Decode the token to get the current user's username
-      let decoded;
-      try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET_KEY); // Replace with your JWT secret
-      } catch (err) {
-        console.error("Token verification failed:", err.message);
-        return res.status(401).json({ message: "Invalid or expired token" })
+      // Fetch the user based on userId
+      const currentUser = await User.findById(userId); // Assuming `User` is your Mongoose model
+  
+      if (!currentUser) {
+        console.log("Current user not found.");
+        return res.status(404).json({ message: "User not found with the given userId" });
       }
-
-      console.log(decoded);
   
-      const currentUsername = decoded.username; // Extract the username from the token
+      const currentUsername = currentUser.username; // Extract the username from the found user
+      console.log("Username from userId:", currentUsername);
   
-      console.log("Decoded Username from Token:", currentUsername);
+      // Fetch the target user by username
+      const targetUser = await User.findOne({ username });
   
-      // Fetch the user by username
-      const user = await User.findOne({ username });
+      console.log("Fetched Target User:", targetUser);
   
-      console.log("Fetched User:", user);
-  
-      if (!user) {
-        console.log("User not found.");
+      if (!targetUser) {
+        console.log("Target user not found.");
         return res.status(404).json({ message: "User not found" });
       }
   
@@ -170,10 +163,10 @@ async function getUserProfile(req, res) {
   
         // If it's the user's own profile, send all starred repos
         if (isOwnProfile) {
-          starRepos = user.starRepos; // All starred repositories
+          starRepos = targetUser.starRepos; // All starred repositories
         } else {
           // If it's another user's profile, filter by visibility
-          starRepos = user.starRepos.filter((repo) => repo.visibility === "true");
+          starRepos = targetUser.starRepos.filter((repo) => repo.visibility === "true");
         }
   
         // Populate repository details using populate() for starred repositories
@@ -213,12 +206,13 @@ async function getUserProfile(req, res) {
   
       // Default behavior: Return the entire user object
       console.log("Returning full user object.");
-      res.json(user);
+      res.json(targetUser);
     } catch (err) {
       console.error("Error during fetching:", err.message);
       res.status(500).send("Server error!");
     }
   }
+  
 
 async function updateUserProfile(req,res){
     const currentID = req.params.id;
