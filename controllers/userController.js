@@ -402,6 +402,10 @@ async function followOrUnfollowUser(req, res) {
       if (!userToFollow) {
         return res.status(404).json({ message: "User to follow not found!" });
       }
+
+      if(currentUser._id.toString() === userToFollow._id.toString()){
+        return res.status(404).json({message: "Not allowed"});
+      }
   
       // Check if the user is already following
       const alreadyFollowing = currentUser.followedUsers.some(
