@@ -278,6 +278,7 @@ async function deleteRepositoryById(req, res) {
       if (!repository) {
           return res.status(404).json({ error: "Repository not found" });
       }
+      console.log(`Repository found: ${repository.name}`);
 
       // Check if the userId matches the owner of the repository
       if (repository.owner.toString() !== userId) { // Assuming `owner` is the field that stores the userId
@@ -286,9 +287,11 @@ async function deleteRepositoryById(req, res) {
 
       // Extract repository name
       const repoName = repository.name;
+      console.log(`Repository name: ${repoName}`);
 
       // S3 key to point to the folder
       const repoS3Key = `commits/${repoName}/`; // Folder inside 'commits'
+      console.log(`S3 key: ${repoS3Key}`);
 
       // List objects in the folder
       const listParams = {
@@ -296,25 +299,50 @@ async function deleteRepositoryById(req, res) {
           Prefix: repoS3Key, // All objects starting with this prefix
       };
 
-      // List all objects inside the folder
-      const listedObjects = await s3.listObjectsV2(listParams).promise();
+      try {
+          // List all objects inside the folder
+          const listedObjects = await s3.listObjectsV2(listParams).promise();
+          console.log(`Listed objects in S3: ${listedObjects.Contents.length} items found.`);
 
-      // If there are objects, delete them
-      if (listedObjects.Contents.length > 0) {
-          const deleteParams = {
-              Bucket: "apninewbucket",
-              Delete: {
-                  Objects: listedObjects.Contents.map(object => ({ Key: object.Key })),
-              },
-          };
+          // If there are objects, delete them
+          if (listedObjects.Contents.length > 0) {
+              const deleteParams = {
+                  Bucket: "apninewbucket",
+                  Delete: {
+                      Objects: listedObjects.Contents.map(object => ({ Key: object.Key })),
+                  },
+              };
 
-          // Delete all objects in the folder
-          await s3.deleteObjects(deleteParams).promise();
-          console.log(`Deleted ${listedObjects.Contents.length} objects inside ${repoS3Key}`);
+              // Delete all objects in the folder
+              await s3.deleteObjects(deleteParams).promise();
+              console.log(`Deleted ${listedObjects.Contents.length} objects inside ${repoS3Key}`);
+          } else {
+              console.log("No objects found in S3 to delete.");
+          }
+      } catch (s3Error) {
+          // Handle error for S3 deletion (in case repository exists in MongoDB but not in S3)
+          console.error("Error during S3 deletion:", s3Error.message);
+          // Proceed even if S3 deletion fails
+      }
+
+      // Remove the repository from the 'starRepos' field of users who have starred it
+      if (repository.starredBy && repository.starredBy.length > 0) {
+          console.log("Removing repository from users' starred repos...");
+          for (let username of repository.starredBy) {
+              const user = await User.findOne({ username });
+              if (user) {
+                  user.starRepos = user.starRepos.filter(repoId => repoId.toString() !== id);  // Remove repoId from starRepos
+                  await user.save();
+                  console.log(`Removed repository ${repoName} from user ${username}'s starred repositories.`);
+              }
+          }
+      } else {
+          console.log("No users have starred this repository.");
       }
 
       // Delete the repository from the database
       await Repository.findByIdAndDelete(id);
+      console.log(`Repository ${repoName} deleted from MongoDB.`);
 
       res.json({ message: "Repository and associated data deleted successfully!" });
   } catch (err) {
@@ -322,6 +350,7 @@ async function deleteRepositoryById(req, res) {
       res.status(500).send("Server error");
   }
 }
+
 
 
 
