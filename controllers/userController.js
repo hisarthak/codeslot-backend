@@ -327,6 +327,7 @@ async function starOrFollow(req, res) {
                 isStarred: isAlreadyStarred,
                 repo_id: repo._id,
                 visibility: repo.visibility,
+                owner: repo.owner,
             });
         }
 
