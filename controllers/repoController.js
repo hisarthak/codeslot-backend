@@ -268,21 +268,61 @@ async function toggleVisibilityById(req, res) {
   }
 }
 
+async function deleteRepositoryById(req, res) {
+  const { id } = req.params;
+  const { userId } = req.query;  // Extract userId from the query parameters
 
-async function deleteRepositoryById(req, res){
-    const {id} = req.params;
-
-    try{
-const repository = await Repository.findByIdAndDelete(id);
-if(!repository){
-    return res.status(404).json({error: "Repository not found"});
- }
- res.json({message:"Repository deleted successfully!"});
-    }catch(err){
-       console.error("Error during deleting repository : ", err.message);
-       res.status(500).send("Server error");
+  try {
+      // Find the repository by ID
+      const repository = await Repository.findById(id);
+      if (!repository) {
+          return res.status(404).json({ error: "Repository not found" });
       }
-};
+
+      // Check if the userId matches the owner of the repository
+      if (repository.owner.toString() !== userId) { // Assuming `owner` is the field that stores the userId
+          return res.status(403).json({ error: "You do not have permission to delete this repository" });
+      }
+
+      // Extract repository name
+      const repoName = repository.name;
+
+      // S3 key to point to the folder
+      const repoS3Key = `commits/${repoName}/`; // Folder inside 'commits'
+
+      // List objects in the folder
+      const listParams = {
+          Bucket: "apninewbucket",
+          Prefix: repoS3Key, // All objects starting with this prefix
+      };
+
+      // List all objects inside the folder
+      const listedObjects = await s3.listObjectsV2(listParams).promise();
+
+      // If there are objects, delete them
+      if (listedObjects.Contents.length > 0) {
+          const deleteParams = {
+              Bucket: "apninewbucket",
+              Delete: {
+                  Objects: listedObjects.Contents.map(object => ({ Key: object.Key })),
+              },
+          };
+
+          // Delete all objects in the folder
+          await s3.deleteObjects(deleteParams).promise();
+          console.log(`Deleted ${listedObjects.Contents.length} objects inside ${repoS3Key}`);
+      }
+
+      // Delete the repository from the database
+      await Repository.findByIdAndDelete(id);
+
+      res.json({ message: "Repository and associated data deleted successfully!" });
+  } catch (err) {
+      console.error("Error during deleting repository:", err.message);
+      res.status(500).send("Server error");
+  }
+}
+
 
 
 
@@ -335,6 +375,7 @@ async function fetchAndProcessCommitDataFromS3(repoName, commitID) {
     return {}; // Return an empty object if there's an error
   }
 }
+
 
 // Route to handle requests for file system generation
 async function repoFolderStructure(req, res) {
