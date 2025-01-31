@@ -2,8 +2,6 @@ const fs = require("fs").promises;
 const path = require("path");
 const readline = require("readline");
 const jwt = require("jsonwebtoken");
-const { s3, S3_BUCKET } = require("../config/aws-config");
-
 
 const axios = require("axios");
 require("dotenv").config();
