@@ -38,9 +38,13 @@ async function createRepository(req, res) {
        // Normalize and trim repository name
        let trimmedName = name.trim().replace(/\s+/g, ' '); // Removes extra spaces and ensures single spaces between words
 
+       if (/\s/.test(name)) {
+        return res.status(400).json({ error: "No spaces allowed in repository name." });
+    }
        if (!trimmedName) {
            return res.status(400).json({ error: "Repository name is required!" });
        }
+
 
         // Validate the repository name
         const repoNameRegex = /^(?!-)[a-zA-Z0-9-_ ]*(?<!-)$/; // Ensures no hyphen at the start or end
