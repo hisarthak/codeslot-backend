@@ -252,7 +252,7 @@ async function updateRepositoryByRepoName(req, res) {
     if (!userId) {
       return res.json({
         message: "User ID not provided. Returning current description.",
-        description: repository,
+        description: repository.description,
       });
     }
 
