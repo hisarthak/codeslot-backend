@@ -157,8 +157,9 @@ async function fetchRepositoriesForCurrentUser(req, res) {
   console.log("Querying as userId:", userId);
 
   try {
-    // Find the user by username to get their ownerId
-    const user = await User.findOne({ username });
+    // Find the user by username and populate repositories
+    const user = await User.findOne({ username }).populate("repositories");
+
     if (!user) {
       console.log("User not found.");
       return res.status(404).json({ message: "User not found" });
@@ -168,20 +169,17 @@ async function fetchRepositoriesForCurrentUser(req, res) {
 
     // Determine if the requesting user is the same as the profile owner
     const isOwner = user._id.toString() === userId;
-
     console.log("Is Requesting User the Owner?:", isOwner);
 
-    // Fetch repositories based on ownership or visibility
-    const query = isOwner
-      ? { owner: user._id } // Fetch all repositories for the owner
-      : { owner: user._id, visibility: true }; // Fetch only visible repositories for others
-
-    const repositories = await Repository.find(query);
+    // Filter repositories based on ownership or visibility
+    let repositories = user.repositories;
+    if (!isOwner) {
+      repositories = repositories.filter((repo) => repo.visibility === true);
+    }
 
     console.log("Fetched Repositories:", repositories);
 
-    // Return the repositories
-    if (!repositories || repositories.length === 0) {
+    if (!repositories.length) {
       return res.status(200).json({ message: "No repositories found!", repositories: [] });
     }
 
@@ -191,6 +189,7 @@ async function fetchRepositoriesForCurrentUser(req, res) {
     res.status(500).send("Server error");
   }
 }
+
 async function updateRepositoryByRepoName(req, res) {
   const { repoName } = req.params; // Extract repoName from params
   const { description } = req.body; // Extract description from body
