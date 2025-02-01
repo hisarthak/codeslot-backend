@@ -153,42 +153,65 @@ async function fetchRepositoriesForCurrentUser(req, res) {
   const { username } = req.params; // Get the username from the route parameter
   const { userId } = req.query; // Get the userId from the query parameters
 
-  console.log("Fetching repositories for username:", username);
-  console.log("Querying as userId:", userId);
+  console.log("🟡 Fetching repositories for username:", username);
+  console.log("🟡 Querying as userId:", userId);
 
   try {
+    console.log("🔵 Searching for user in database...");
+    
     // Find the user by username and populate repositories
     const user = await User.findOne({ username }).populate("repositories");
 
     if (!user) {
-      console.log("User not found.");
+      console.log("❌ User not found.");
       return res.status(404).json({ message: "User not found" });
     }
 
-    console.log("Fetched User:", user);
+    console.log("✅ User found:", {
+      userId: user._id.toString(),
+      username: user.username,
+      totalRepositories: user.repositories.length,
+    });
 
     // Determine if the requesting user is the same as the profile owner
     const isOwner = user._id.toString() === userId;
-    console.log("Is Requesting User the Owner?:", isOwner);
+    console.log(`🔍 Is Requesting User the Owner?: ${isOwner}`);
+
+    // Log all repository details
+    console.log("📂 Raw Repositories:", user.repositories.map(repo => ({
+      id: repo._id.toString(),
+      name: repo.name,
+      visibility: repo.visibility,
+    })));
 
     // Filter repositories based on ownership or visibility
     let repositories = user.repositories;
     if (!isOwner) {
+      console.log("⚠️ User is NOT the owner. Filtering for public repositories...");
       repositories = repositories.filter((repo) => repo.visibility === true);
     }
 
-    console.log("Fetched Repositories:", repositories);
+    console.log("📂 Filtered Repositories:", repositories.map(repo => ({
+      id: repo._id.toString(),
+      name: repo.name,
+      visibility: repo.visibility,
+    })));
 
     if (!repositories.length) {
+      console.log("ℹ️ No repositories found for this user.");
       return res.status(200).json({ message: "No repositories found!", repositories: [] });
     }
 
+    console.log("✅ Repositories successfully fetched.");
     res.json({ message: "Repositories found!", repositories });
   } catch (err) {
-    console.error("Error during fetching user repositories:", err.message);
+    console.error("❌ Error during fetching user repositories:", err.message);
+    console.error(err.stack); // Print full stack trace for debugging
     res.status(500).send("Server error");
   }
 }
+
+
 
 async function updateRepositoryByRepoName(req, res) {
   const { repoName } = req.params; // Extract repoName from params
