@@ -6,6 +6,7 @@ const UserSchema = new Schema({
     type: String,
     required: true,
     unique: true,
+    index: true,  // Create an index on the username field
   },
   email: {
     type: String,
@@ -44,6 +45,9 @@ const UserSchema = new Schema({
     },
   ],
 });
+
+// Add an index on the `username` field for faster lookups
+UserSchema.index({ username: 1 });
 
 const User = mongoose.model("User", UserSchema);
 
