@@ -33,9 +33,10 @@ async function connectClient() {
 
 async function createRepository(req, res) {
   const { username, owner, name, issues, content, description, visibility } = req.body;
-
+console.log("hi",description);
+console.log(username);
   try {
-      console.log("Received repository creation request for:", { username, owner, name });
+      console.log("Received repository creation request for:", { username, owner, name, description });
 
       // Normalize and trim repository name
       let trimmedName = name.trim().replace(/\s+/g, ' '); // Removes extra spaces and ensures single spaces between words
@@ -90,7 +91,7 @@ async function createRepository(req, res) {
 
       console.log("Saving repository...");
       const savedRepo = await newRepository.save();
-      console.log("Repository saved:", { repoId: savedRepo._id, name: savedRepo.name });
+      console.log("Repository saved:", { repoId: savedRepo._id, name: savedRepo.name, description: savedRepo.description });
 
       // Add the new repository ID to the user's repositories array
       user.repositories.push(savedRepo._id);
