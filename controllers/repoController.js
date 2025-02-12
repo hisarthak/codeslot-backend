@@ -78,11 +78,11 @@ console.log(username);
       }
 
       console.log("User found:", { userId: user._id, username: user.username });
-
+      const repoDescription = description && description.trim() ? description.trim() : "No description provided";
       // Create the new repository object
       const newRepository = new Repository({
           name: trimmedName,
-          description,
+          description: repoDescription, 
           visibility,
           owner,
           content,
