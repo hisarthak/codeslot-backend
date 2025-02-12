@@ -28,6 +28,8 @@ async function signup (req,res){
   let {username, password, email } = req.body;
    // **Trim username to remove accidental spaces**
    username = username?.trim();
+   password = password?.trim();
+   email = email?.trim();
 
    // **Check if any field is missing**
    if (!username || !password || !email) {
@@ -38,6 +40,10 @@ async function signup (req,res){
    if (username.includes(" ")) {
      return res.status(400).json({ message: "Username cannot contain spaces!" });
    }
+    // **Check if username contains spaces**
+    if (password.includes(" ")) {
+      return res.status(400).json({ message: "Password cannot contain spaces!" });
+    }
   try{
     await connectClient();
     const db = client.db("githubclone");
@@ -76,6 +82,7 @@ async function signup (req,res){
 async function login(req, res) {
     let { username, password } = req.body; // Replace email with username
     username = username?.trim();
+    password = password?.trim();
     try {
         await connectClient();
         const db = client.db("githubclone");
