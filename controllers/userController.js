@@ -460,6 +460,28 @@ async function followOrUnfollowUser(req, res) {
   }
 
 
+async function verifyToken(req, res) {
+  try {
+      const { token } = req.body; // Extract token from body
+      if (!token) {
+          return res.status(400).json({ valid: false, message: "Token is required!" });
+      }
+
+      // Verify JWT
+      jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
+          if (err) {
+              return res.status(401).json({ valid: false, message: "Invalid or expired token!" });
+          }
+          return res.status(200).json({ valid: true, userId: decoded.id });
+      });
+
+  } catch (error) {
+      console.error("Error verifying token:", error);
+      res.status(500).json({ valid: false, message: "Server error!" });
+  }
+}
+
+
 module.exports = {
     getAllUsers,
     signup,
@@ -469,4 +491,5 @@ module.exports = {
     deleteUserProfile,
     starOrFollow,
     followOrUnfollowUser,
+    verifyToken,
 };
