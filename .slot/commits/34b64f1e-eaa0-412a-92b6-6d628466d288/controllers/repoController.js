@@ -33,9 +33,10 @@ async function connectClient() {
 
 async function createRepository(req, res) {
   const { username, owner, name, issues, content, description, visibility } = req.body;
-
+console.log("hi",description);
+console.log(username);
   try {
-      console.log("Received repository creation request for:", { username, owner, name });
+      console.log("Received repository creation request for:", { username, owner, name, description });
 
       // Normalize and trim repository name
       let trimmedName = name.trim().replace(/\s+/g, ' '); // Removes extra spaces and ensures single spaces between words
@@ -90,7 +91,7 @@ async function createRepository(req, res) {
 
       console.log("Saving repository...");
       const savedRepo = await newRepository.save();
-      console.log("Repository saved:", { repoId: savedRepo._id, name: savedRepo.name });
+      console.log("Repository saved:", { repoId: savedRepo._id, name: savedRepo.name, description: savedRepo.description });
 
       // Add the new repository ID to the user's repositories array
       user.repositories.push(savedRepo._id);
@@ -175,63 +176,46 @@ async function fetchRepositoriesForCurrentUser(req, res) {
   const { username } = req.params; // Get the username from the route parameter
   const { userId } = req.query; // Get the userId from the query parameters
 
-  console.log("🟡 Fetching repositories for username:", username);
-  console.log("🟡 Querying as userId:", userId);
+  console.log("Fetching repositories for username:", username);
+  console.log("Querying as userId:", userId);
 
   try {
-    console.log("🔵 Searching for user in database...");
-    
-    // Find the user by username and populate repositories
-    const user = await User.findOne({ username }).populate("repositories");
-
+    // Find the user by username to get their ownerId
+    const user = await User.findOne({ username }).lean(); // Using lean() to get a plain JavaScript object
     if (!user) {
-      console.log("❌ User not found.");
+      console.log("User not found.");
       return res.status(404).json({ message: "User not found" });
     }
 
-    console.log("✅ User found:", {
-      userId: user._id.toString(),
-      username: user.username,
-      totalRepositories: user.repositories.length,
-    });
+    console.log("Fetched User:", user);
 
     // Determine if the requesting user is the same as the profile owner
     const isOwner = user._id.toString() === userId;
-    console.log(`🔍 Is Requesting User the Owner?: ${isOwner}`);
 
-    // Log all repository details
-    console.log("📂 Raw Repositories:", user.repositories.map(repo => ({
-      id: repo._id.toString(),
-      name: repo.name,
-      visibility: repo.visibility,
-    })));
+    console.log("Is Requesting User the Owner?:", isOwner);
 
-    // Filter repositories based on ownership or visibility
-    let repositories = user.repositories;
-    if (!isOwner) {
-      console.log("⚠️ User is NOT the owner. Filtering for public repositories...");
-      repositories = repositories.filter((repo) => repo.visibility === true);
-    }
+    // Fetch repositories based on ownership or visibility
+    const query = isOwner
+      ? { owner: user._id } // Fetch all repositories for the owner
+      : { owner: user._id, visibility: true }; // Fetch only visible repositories for others
 
-    console.log("📂 Filtered Repositories:", repositories.map(repo => ({
-      id: repo._id.toString(),
-      name: repo.name,
-      visibility: repo.visibility,
-    })));
+    // Fetch repositories and populate the owner field with user details
+    const repositories = await Repository.find(query).populate('owner'); // Populate the 'owner' field
 
-    if (!repositories.length) {
-      console.log("ℹ️ No repositories found for this user.");
+    console.log("Fetched Repositories:", repositories);
+
+    // Return the repositories
+    if (!repositories || repositories.length === 0) {
       return res.status(200).json({ message: "No repositories found!", repositories: [] });
     }
 
-    console.log("✅ Repositories successfully fetched.");
     res.json({ message: "Repositories found!", repositories });
   } catch (err) {
-    console.error("❌ Error during fetching user repositories:", err.message);
-    console.error(err.stack); // Print full stack trace for debugging
+    console.error("Error during fetching user repositories:", err.message);
     res.status(500).send("Server error");
   }
 }
+
 
 
 

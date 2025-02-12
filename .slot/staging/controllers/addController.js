@@ -1,7 +1,7 @@
 const fs = require("fs").promises;
 const path = require("path");
 const crypto = require("crypto");
-
+// dkfaklf
 async function handleDeletedFiles(snapshot, stagingDir, slotIgnoreFile) {
   try {
     const ignorePatterns = await loadSlotIgnore(slotIgnoreFile);
@@ -332,6 +332,7 @@ async function addModifiedOrLogs() {
           await fs.mkdir(stagingDirPath, { recursive: true });
           
           const matchedOldFile = Object.values(oldSnapshot).find((oldFile) => oldFile.id === inode);
+
 
           newSnapshot[relativePath] = { 
             id: inode,

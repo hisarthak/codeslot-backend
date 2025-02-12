@@ -175,7 +175,7 @@ async function getUserProfile(req, res) {
           .populate({
             path: "starRepos", // Field to populate
             match: isOwnProfile ? {} : { visibility: "true" }, // Filter starred repositories by visibility for non-own profiles
-            select: "name description visibility", // Fields to select for populated repositories
+            select: "name description visibility starredBy", // Fields to select for populated repositories
           })
           .select("starRepos"); // Select the starRepos field only
   

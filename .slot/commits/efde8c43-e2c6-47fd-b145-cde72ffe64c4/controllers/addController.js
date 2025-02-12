@@ -333,6 +333,7 @@ async function addModifiedOrLogs() {
           
           const matchedOldFile = Object.values(oldSnapshot).find((oldFile) => oldFile.id === inode);
 
+          
           newSnapshot[relativePath] = { 
             id: inode,
            text: entry.name,
