@@ -27,9 +27,9 @@ async function connectClient() {
 async function signup (req,res){
   let {username, password, email } = req.body;
    // **Trim username to remove accidental spaces**
-   username = username?.trim();
+   username = username?.trim().toLowerCase();
    password = password?.trim();
-   email = email?.trim();
+   email = email?.trim().toLowerCase();
 
    // **Check if any field is missing**
    if (!username || !password || !email) {
@@ -81,7 +81,7 @@ async function signup (req,res){
 
 async function login(req, res) {
     let { username, password } = req.body; // Replace email with username
-    username = username?.trim();
+    username = username?.trim().toLowerCase();
     password = password?.trim();
     try {
         await connectClient();
