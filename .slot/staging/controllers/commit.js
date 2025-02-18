@@ -166,6 +166,7 @@ commitCount2 = commitCount;
       data.new = false;
     }
 
+    
     // Write the updated oldSnapshot back to the file
     await fs.writeFile(
       oldSnapshotPath,

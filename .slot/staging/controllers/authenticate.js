@@ -6,6 +6,7 @@ require("dotenv").config();
 
 const apiUrl = process.env.API_URL;
 
+
 // Function to prompt user for username and password
 function authenticateUser() {
     const rl = readline.createInterface({
@@ -15,6 +16,7 @@ function authenticateUser() {
 
     return new Promise((resolve, reject) => {
         console.log("Authentication will be valid for 30 days.");
+        
         
         rl.question("Enter your username: ", (username) => {
             rl.question("Enter your password: ", async (password) => {

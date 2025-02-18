@@ -46,9 +46,10 @@ function writeRemoteFile(content) {
 
 // Command to add a remote URL (overwrites if exists)
 function addRemote(url) {
+    
     url = url.trim();
     // Validate URL format
-    const regex = /^https:\/\/slotcode\.in\/[a-zA-Z0-9_\-/]+$/;
+    const regex = /^https:\/\/codeslot\.in\/[a-zA-Z0-9_\-/]+$/;
     if (!regex.test(url)) {
         console.error(`Invalid URL`);
         process.exit(1);
@@ -76,8 +77,7 @@ function listRemote() {
         return;
     }
     const remoteData = readRemoteFile();
-    console.log(`Current remote: ${remoteData.url}`);
-    console.log(`Added at: ${remoteData.addedAt}`);
+    console.log(`remote: ${remoteData.url}`);
 }
 
 module.exports = {

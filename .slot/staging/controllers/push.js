@@ -54,7 +54,7 @@ async function validateRepositoryAccess() {
         const remoteUrl = remote.url;
 
         // Validate the URL format
-        const match = remoteUrl.match(/^https:\/\/slotcode\.in\/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)$/);
+        const match = remoteUrl.match(/^https:\/\/codeslot\.in\/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)$/);
         if (!match) {
             throw new Error("Invalid remote URL format.");
         }
@@ -127,6 +127,7 @@ function promptLogin() {
     });
 }
 async function pushRepo() {
+    const chalk = await import("chalk"); 
     const repoPath = path.resolve(process.cwd(), ".slot");
     const remotePath = path.join(repoPath, ".remote.json");
     const commitPath = path.join(repoPath, "commits");
@@ -145,7 +146,7 @@ async function pushRepo() {
         const remoteData = await fs.readFile(remotePath, "utf8");
         const remote = JSON.parse(remoteData);
         const remoteUrl = remote.url;
-        const match = remoteUrl.match(/^https:\/\/slotcode\.in\/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)$/);
+        const match = remoteUrl.match(/^https:\/\/codeslot\.in\/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)$/);
         const repoName = match ? match[1] : null;
           if (!repoName) {
             throw new Error("Invalid repository name format.");
@@ -154,7 +155,8 @@ async function pushRepo() {
         const loggedIn = await isLoggedIn();
         let token;
         if (!loggedIn) {
-            console.log("Authentication required, valid for 30 days.");
+           
+            console.log(chalk.default.yellow("Authentication required, valid for 30 days."));
             token = await promptLogin(); // Prompt for login if not logged in
             console.log("Authentication successful.");
         }
@@ -177,7 +179,7 @@ async function pushRepo() {
             console.log("Everything up to date.");
             return;
         }
-        console.log("Pushing...");
+        console.log(chalk.default.yellow("Pushing..."));
 
 
         // Read and validate commit.json
@@ -206,7 +208,7 @@ async function pushRepo() {
         highestCountCommit.push = false;
         // Write the updated logs.json back to file
         await fs.writeFile(logsPath, JSON.stringify(logs, null, 2), "utf8");
-        console.log("Pushed successfully");
+        console.log(chalk.default.green("Pushed successfully"));
     } catch (err) {
         console.error("Error during pushing commits: ", err.message);
     }

@@ -1,23 +1,16 @@
 [
   {
-    "commitID": "40aa1390-57a3-4aaa-b328-e6cfead00682",
+    "commitID": "1c53d2e2-6351-49a8-ac9f-aa2f36910602",
     "message": "yes",
-    "date": "2025-02-11T10:36:42.582Z",
-    "push": false,
+    "date": "2025-02-18T05:10:58.198Z",
+    "push": true,
     "count": 1
   },
   {
-    "commitID": "efde8c43-e2c6-47fd-b145-cde72ffe64c4",
-    "message": "fix: resolved a minor issue that turned into a major headache and almost made me quit coding forever Okay, so initially, this was supposed to be a tiny fix.",
-    "date": "2025-02-11T11:14:16.289Z",
-    "push": false,
+    "commitID": "d33d8505-66f2-48a1-ad6a-72f965792548",
+    "message": "this is it",
+    "date": "2025-02-18T05:12:30.866Z",
+    "push": true,
     "count": 2
-  },
-  {
-    "commitID": "34b64f1e-eaa0-412a-92b6-6d628466d288",
-    "message": "didi ko dikhane ke liye",
-    "date": "2025-02-11T13:50:28.442Z",
-    "push": false,
-    "count": 3
   }
 ]

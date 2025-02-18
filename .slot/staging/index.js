@@ -28,6 +28,7 @@ const { hideBin } = require("yargs/helpers");
 const { initRepo } = require("./controllers/init.js");
 const { addFileToRepo, addModifiedOrLogs } = require("./controllers/addController");
 const { commitRepo } = require("./controllers/commit.js");
+const { commitLogs } = require("./controllers/commitLogs.js");
 const { pushRepo } = require("./controllers/push");
 const { pullRepo } = require("./controllers/pull");
 const { revertRepo } = require("./controllers/revert");
@@ -41,6 +42,7 @@ const agent = new https.Agent({
 dotenv.config();
 
 yargs(hideBin(process.argv))
+.scriptName("slot")
 .command("start", "Start a new server", {}, startServer)
 .command("init", "Initialise a new repository", {}, initRepo)
   .command(
@@ -80,7 +82,7 @@ yargs(hideBin(process.argv))
 .command(
     "revert <commitID>",
     "Revert to a specific commit",
-    (yargs) => {f
+    (yargs) => {
         yargs.positional("commitID", {
             describe: "Commit ID to revert to",
             type: "string",
@@ -91,14 +93,14 @@ yargs(hideBin(process.argv))
     }
 )
 .command(
-    "remote <action> [url]",
+    "remote [action] [url]",
     "Manage remotes",
     (yargs) => {
         yargs
             .positional("action", {
                 describe: "Action to perform (add, remove, list)",
                 type: "string",
-                choices: ["add", "remove", "list"],
+                choices: ["add", "remove"],
             })
             .option("url", {
                 describe: "URL of the remote repository (required for add)",
@@ -109,7 +111,10 @@ yargs(hideBin(process.argv))
         const { action, url } = argv;
 
         // Handle subcommands based on `action`
-        if (action === "add") {
+        if (!action) {
+            listRemote();}
+            
+       else if (action === "add") {
             if (!url) {
                 console.error("Error: --url is required for the 'add' action.");
                 process.exit(1);
@@ -117,8 +122,6 @@ yargs(hideBin(process.argv))
             addRemote(url);
         } else if (action === "remove") {
             removeRemote();
-        } else if (action === "list") {
-            listRemote();
         } else {
             console.error(`Unknown action: ${action}`);
             process.exit(1);
@@ -136,6 +139,40 @@ yargs(hideBin(process.argv))
             console.error("Authentication failed.");
             process.exit(1);
         }
+    }
+)
+.command("log", "Show commit logs", {},  (argv) => {
+    commitLogs();
+})
+.command(
+    "*", // This wildcard catches any unknown command
+    "Show help",
+    (argv) => {
+        console.error("Invalid command");
+        console.log("Commands:");
+        const commands = [
+            ["slot init", "Initializes a new repository."],
+            ["slot add <file>", "Adds a specific file to staging."],
+            ["slot add .", "Adds all modified/new logs to staging."],
+            ["slot commit -m \"message\"", "Commits staged files (message required)."],
+            ["slot push", "Pushes commits to the repository."],
+            ["slot pull", "Pulls the latest changes from the repository."],
+            ["slot revert <commitID>", "Reverts to a specific commit."],
+            ["slot remote add <url>", "Adds a new remote."],
+            ["slot remote remove", "Removes the remote."],
+            ["slot remote", "Lists all remotes."],
+            ["slot auth", "Authenticates the user."],
+            ["slot log", "Shows commit history."]
+        ];
+        
+        const maxCommandLength = Math.max(...commands.map(cmd => cmd[0].length)); // Find the longest command
+        
+        commands.forEach(([cmd, desc]) => {
+            console.log(cmd.padEnd(maxCommandLength + 10) + desc); // Adjust padding
+        });
+        console.log("\nUse 'slot --help' to view this message anytime.\n");
+       
+        process.exit(1);
     }
 )
 .demandCommand(1, "You need at least one command")
