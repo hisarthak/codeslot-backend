@@ -12,12 +12,11 @@ repoRouter.get("/repo/search", repoController.findUsersAndRepositories);
 repoRouter.get("/repo/name/:name", repoController.fetchRepositoryByName);
 repoRouter.get("/repo/user/:username", repoController.fetchRepositoriesForCurrentUser);
 
-repoRouter.post("/repo/user/url/generate-urls", repoController.generateMultiplePresignedUrls);
 // Details for a specific repository
 repoRouter.get("/repo/user/details/:reponame/logs", repoController.fetchLogsFromS3);
 repoRouter.get("/repo/user/details/:reponame/file/:filePath", repoController.fetchFileContent); // Changed to explicitly use 'file'
 repoRouter.post("/repo/user/details/:reponame", repoController.repoFolderStructure);
-
+repoRouter.post("/repo/user/details/generate-urls", repoController.generateMultiplePresignedUrls);
 
 // Repository operations by ID
 repoRouter.get("/repo/:id", repoController.fetchRepositoryById);

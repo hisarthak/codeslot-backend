@@ -243,13 +243,19 @@ async function uploadDirectoryToS3(localPath, s3BasePath, rootPath) {
     // STEP 2: Request ALL pre-signed URLs at once for all files
     if (files.length > 0) {
         const keyNames = files.map(file => file.keyName);
-        const response = await fetch("https://gitspace.duckdns.org:3002/repo/user/details/generate-urls", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ keyNames, theToken }),
-        });
+        try {
+            const response = await axios.post(
+                "https://gitspace.duckdns.org:3002/repo/user/url/generate-urls",
+                { keyNames, theToken },  // Data must match backend expectations
+                { headers: { "Content-Type": "application/json" } }
+            );
+            console.log("Success:", response.data);
+        } catch (error) {
+            console.error("Error Response:", error.response?.data || error.message);
+        }
 
         const { uploadUrls } = await response.json(); // Backend returns all URLs
+        console.log(uploadUrls);
 
         // STEP 3: Upload ALL files in parallel using Promise.all
         await Promise.all(
