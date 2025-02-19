@@ -717,8 +717,44 @@ async function findUsersAndRepositories(req, res) {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 }
+function isTokenValid(token) {
+  try {
+      const decoded = jwt.verify(token, JWT_SECRET_KEY);
+      return true; // Token is valid
+  } catch (error) {
+      return false; // Token is expired or invalid
+  }
+}
 
 
+async function generateMultiplePresignedUrls(req, res) {
+  try {
+    const { keyNames, theToken } = req.body; // keyNames is an array
+
+    // Validate the token once
+    if (!isTokenValid(theToken)) {
+      return res.status(401).json({ error: "Unauthorized: Token is expired or invalid" });
+    }
+
+    // Generate all URLs in parallel
+    const urlPromises = keyNames.map((keyName) => {
+      const params = {
+        Bucket: S3_BUCKET,
+        Key: keyName,
+        Expires: 300,
+      };
+      return s3.getSignedUrlPromise("putObject", params);
+    });
+
+    // Wait for all URLs to be generated
+    const uploadUrls = await Promise.all(urlPromises);
+
+    res.json({ uploadUrls });
+  } catch (error) {
+    console.error("Error generating pre-signed URLs:", error);
+    res.status(500).json({ error: "Failed to generate pre-signed URLs" });
+  }
+}
 
 
 
@@ -735,4 +771,5 @@ module.exports = {
     deleteRepositoryById,
     fetchLogsFromS3,
     findUsersAndRepositories,
+    generateMultiplePresignedUrls
 }

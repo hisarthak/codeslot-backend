@@ -23,7 +23,7 @@ function authenticateUser() {
                 try {
                     // Send login request to your backend
                     const res = await axios.post(
-                        `https://${apiUrl}/login`,
+                        `https://gitspace.duckdns.org:3002/login`,
                         {
                             username: username,
                             password: password,

@@ -3,6 +3,7 @@ const path = require("path");
 const readline = require("readline");
 const jwt = require("jsonwebtoken");
 const { s3, S3_BUCKET } = require("../config/aws-config");
+let theToken;
 
 
 const axios = require("axios");
@@ -23,6 +24,7 @@ async function isLoggedIn() {
             try {
                 // Verify the JWT token (this will automatically check for expiration)
                 jwt.verify(userConfig.token, process.env.JWT_SECRET_KEY);
+                theToken = userConfig.token;
                 return true; // Token is valid and not expired
             } catch (err) {
                 return false; // Invalid token or token is expired
@@ -40,7 +42,7 @@ async function validateRepositoryAccess() {
     try {
         // Adjust path to .slot folder
         const configPath = path.join(__dirname, "..", ".slot", "config.json");
-        const remotePath = path.join(__dirname, "..", ".slot", ".remote.json");
+        const remotePath = path.join(__dirname, "..", ".slot", "remote.json");
      
 
         // Read the config file (which contains the username)
@@ -89,7 +91,7 @@ function promptLogin() {
                 try {
                     // Send login request to your backend
                     const res = await axios.post(
-                        `https://${apiUrl}/login`,
+                        `https://gitspace.duckdns.org:3002/login`,
                         {
                             username: username,
                             password: password,
@@ -129,7 +131,7 @@ function promptLogin() {
 async function pushRepo() {
     const chalk = await import("chalk"); 
     const repoPath = path.resolve(process.cwd(), ".slot");
-    const remotePath = path.join(repoPath, ".remote.json");
+    const remotePath = path.join(repoPath, "remote.json");
     const commitPath = path.join(repoPath, "commits");
     const logsPath = path.join(repoPath, "logs.json");
    
@@ -138,9 +140,11 @@ async function pushRepo() {
     try {
         // Check if remote.json exists
         try {
+             console.log(remotePath);
             await fs.access(remotePath);
-        } catch {
-            console.error("Remote not set. Please set the remote repository using 'slot remote add <url>'.");
+        } catch(err) {
+            console.log(err);
+            // console.error("Remote not set. Please set the remote repository using 'slot remote add <url>'.");
             return;
         }
         const remoteData = await fs.readFile(remotePath, "utf8");
@@ -158,6 +162,7 @@ async function pushRepo() {
            
             console.log(chalk.default.yellow("Authentication required, valid for 30 days."));
             token = await promptLogin(); // Prompt for login if not logged in
+         theToken = token;
             console.log("Authentication successful.");
         }
     
@@ -214,33 +219,226 @@ async function pushRepo() {
     }
 }
 // Recursive function to upload directory to S3 with relative paths
+// async function uploadDirectoryToS3(localPath, s3BasePath, rootPath) {
+//     const items = await fs.readdir(localPath);
+
+//     for (const item of items) {
+//         const itemPath = path.join(localPath, item);
+//         const stats = await fs.stat(itemPath);
+
+//         if (stats.isFile()) {
+//             // Read file content
+//             const fileContent = await fs.readFile(itemPath);
+
+//             // Determine relative path for S3 and normalize to use forward slashes
+//             const relativePath = path.relative(rootPath, itemPath).replace(/\\/g, "/");
+
+//             // Upload file to S3
+//             const params = {
+//                 Bucket: S3_BUCKET,
+//                 Key: `${s3BasePath}/${relativePath}`, // Include relative path in the S3 key
+//                 Body: fileContent,
+//             };
+//             await s3.upload(params).promise();
+//         } else if (stats.isDirectory()) {
+//             // Recursively upload the directory
+//             await uploadDirectoryToS3(itemPath, s3BasePath, rootPath);
+//         }
+//     }
+// }
+// async function uploadDirectoryToS3(localPath, s3BasePath, rootPath) {
+//     const items = await fs.readdir(localPath);
+//     const files = [];
+//     const directories = [];
+
+//     // STEP 1: Collect all files and directories
+//     for (const item of items) {
+//         const itemPath = path.join(localPath, item);
+//         const stats = await fs.stat(itemPath);
+
+//         if (stats.isFile()) {
+//             // Determine S3 key path
+//             const keyName = `${s3BasePath}/${path.relative(rootPath, itemPath).replace(/\\/g, "/")}`;
+//             files.push({ itemPath, keyName });
+//         } else if (stats.isDirectory()) {
+//             // Store directories separately for recursive processing
+//             directories.push(itemPath);
+//         }
+//     }
+
+//     // STEP 2: Request ALL pre-signed URLs at once for all files
+//     if (files.length > 0) {
+//         const keyNames = files.map(file => file.keyName);
+//         const response = await fetch("https://your-backend.com/generate-urls", {
+//             method: "POST",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({ keyNames, theToken }),
+//         });
+
+//         const { uploadUrls } = await response.json(); // Backend returns all URLs
+
+//         // STEP 3: Upload ALL files in parallel using Promise.all
+//         await Promise.all(
+//             files.map(async (file, index) => {
+//                 const fileContent = await fs.readFile(file.itemPath);
+//                 await fetch(uploadUrls[index], {
+//                     method: "PUT",
+//                     body: fileContent,
+//                 });
+//                 console.log(`Uploaded: ${file.keyName}`);
+//             })
+//         );
+//     }
+
+//     // STEP 4: Recursively upload directories (process them in parallel)
+//     await Promise.all(
+//         directories.map(async (dir) => {
+//             await uploadDirectoryToS3(dir, s3BasePath, rootPath);
+//         })
+//     );
+
+//     console.log("All files and directories uploaded!");
+// }
+
 async function uploadDirectoryToS3(localPath, s3BasePath, rootPath) {
     const items = await fs.readdir(localPath);
+    const files = [];
+    const directories = [];
 
+    // STEP 1: Collect all files and directories
     for (const item of items) {
         const itemPath = path.join(localPath, item);
         const stats = await fs.stat(itemPath);
 
         if (stats.isFile()) {
-            // Read file content
-            const fileContent = await fs.readFile(itemPath);
-
-            // Determine relative path for S3 and normalize to use forward slashes
-            const relativePath = path.relative(rootPath, itemPath).replace(/\\/g, "/");
-
-            // Upload file to S3
-            const params = {
-                Bucket: S3_BUCKET,
-                Key: `${s3BasePath}/${relativePath}`, // Include relative path in the S3 key
-                Body: fileContent,
-            };
-            await s3.upload(params).promise();
+            // Determine S3 key path
+            const keyName = `${s3BasePath}/${path.relative(rootPath, itemPath).replace(/\\/g, "/")}`;
+            files.push({ itemPath, keyName });
         } else if (stats.isDirectory()) {
-            // Recursively upload the directory
-            await uploadDirectoryToS3(itemPath, s3BasePath, rootPath);
+            // Store directories separately for recursive processing
+            directories.push(itemPath);
         }
     }
+
+    // STEP 2: Request ALL pre-signed URLs at once using the function
+    if (files.length > 0) {
+        const keyNames = files.map(file => file.keyName);
+        const uploadUrls = await generateMultiplePresignedUrls(keyNames, theToken);
+
+        // STEP 3: Upload ALL files in parallel using Promise.all
+        await Promise.all(
+            files.map(async (file, index) => {
+                const fileContent = await fs.readFile(file.itemPath);
+                await fetch(uploadUrls[index], {
+                    method: "PUT",
+                    body: fileContent,
+                });
+                console.log(`Uploaded: ${file.keyName}`);
+            })
+        );
+    }
+
+    // STEP 4: Recursively upload directories (process them in parallel)
+    await Promise.all(
+        directories.map(async (dir) => {
+            await uploadDirectoryToS3(dir, s3BasePath, rootPath);
+        })
+    );
+
+    console.log("All files and directories uploaded!");
 }
+
+function isTokenValid(theToken) {
+    try {
+        const decoded = jwt.verify(theToken, process.env.JWT_SECRET_KEY);
+        return true; // Token is valid
+    } catch (error) {
+        return false; // Token is expired or invalid
+    }
+}
+
+async function generateMultiplePresignedUrls(keyNames, theToken) {
+    try {
+      // Validate the token (you need to implement this check)
+      if (!isTokenValid(theToken)) {
+        throw new Error("Unauthorized: Token is expired or invalid");
+      }
+  
+      // Generate all URLs in parallel
+      const urlPromises = keyNames.map((keyName) => {
+        const params = {
+          Bucket: S3_BUCKET,
+          Key: keyName,
+          Expires: 300,
+        };
+        return s3.getSignedUrlPromise("putObject", params);
+      });
+  
+      // Wait for all URLs to be generated
+      const uploadUrls = await Promise.all(urlPromises);
+  
+      return uploadUrls; // Return URLs instead of sending a response
+    } catch (error) {
+      console.error("Error generating pre-signed URLs:", error);
+      throw new Error("Failed to generate pre-signed URLs");
+    }
+  }
+  
+
+// async function uploadDirectoryToS3(localPath, s3BasePath, rootPath) {
+//     const items = await fs.readdir(localPath);
+
+//     for (const item of items) {
+//         const itemPath = path.join(localPath, item);
+//         const stats = await fs.stat(itemPath);
+
+//         if (stats.isFile()) {
+//             // Read file content
+//             const fileContent = await fs.readFile(itemPath);
+
+//             // Determine S3 key path
+//             const keyName = `${s3BasePath}/${path.relative(rootPath, itemPath).replace(/\\/g, "/")}`;
+
+//             // Generate a pre-signed URL
+//             const uploadUrl = await generatePresignedUrl(keyName);
+
+//             // Upload file using the pre-signed URL
+//             await fetch(uploadUrl, {
+//                 method: "PUT",
+//                 body: fileContent,
+//             });
+
+//             console.log(`Uploaded: ${keyName}`);
+//         } else if (stats.isDirectory()) {
+//             // Recursively upload directories
+//             await uploadDirectoryToS3(itemPath, s3BasePath, rootPath);
+//         }
+//     }
+// }
+// function isTokenValid(theToken) {
+//   try {
+//       const decoded = jwt.verify(theToken, process.env.JWT_SECRET_KEY);
+//       return true; // Token is valid
+//   } catch (error) {
+//       return false; // Token is expired or invalid
+//   }
+// }
+
+// async function generatePresignedUrl(keyName, theToken) {
+//     console.log(theToken);
+//   if (!isTokenValid(theToken)) {
+//       throw new Error("Unauthorized: Token is expired or invalid");
+//   }
+
+//   const params = {
+//       Bucket: S3_BUCKET,
+//       Key: keyName,
+//       Expires: 300, // URL expires in 60 seconds
+//   };
+
+//   return s3.getSignedUrlPromise("putObject", params);
+// }
+
 
 
 module.exports = {

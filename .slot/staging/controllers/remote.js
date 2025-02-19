@@ -3,7 +3,7 @@ const path = require('path');
 
 // Adjust path to .slot folder
 const MYGIT_FOLDER = path.join(__dirname, '..', '.slot'); // .slot folder is outside the current folder
-const REMOTE_FILE = path.join(MYGIT_FOLDER, '.remote.json'); // JSON file inside .slot
+const REMOTE_FILE = path.join(MYGIT_FOLDER, 'remote.json'); // JSON file inside .slot
 
 // Ensure .slot folder exists
 function ensureMyGitFolder() {
@@ -13,7 +13,7 @@ function ensureMyGitFolder() {
     }
 }
 
-// Helper function to check if .remote.json file exists
+// Helper function to check if remote.json file exists
 function remoteExists() {
     ensureMyGitFolder();
     return fs.existsSync(REMOTE_FILE);
@@ -27,7 +27,7 @@ function readRemoteFile() {
         const data = fs.readFileSync(REMOTE_FILE, 'utf8');
         return JSON.parse(data);
     } catch (error) {
-        console.error("Error reading .remote.json file:", error.message);
+        console.error("Error reading remote.json file:", error.message);
         process.exit(1);
     }
 }
