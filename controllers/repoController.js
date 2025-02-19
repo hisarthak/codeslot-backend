@@ -719,7 +719,7 @@ async function findUsersAndRepositories(req, res) {
 }
 function isTokenValid(token) {
   try {
-      const decoded = jwt.verify(token, JWT_SECRET_KEY);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
       return true; // Token is valid
   } catch (error) {
       return false; // Token is expired or invalid
