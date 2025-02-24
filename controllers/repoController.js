@@ -730,7 +730,7 @@ async function generateMultiplePresignedUrls(req, res) {
   try {
     console.log("Received request body:", req.body); // Log entire request body
 
-    const { keyNames, theToken } = req.body; // keyNames should be an array
+    const { keyNames, theToken, theLocalRepoId, thePull, ourRepoName, thePushNumber } = req.body; // keyNames should be an array
 
     // Check if keyNames is an array
     if (!Array.isArray(keyNames)) {
@@ -750,84 +750,72 @@ async function generateMultiplePresignedUrls(req, res) {
       return res.status(401).json({ error: "Unauthorized: Token is expired or invalid" });
     }
 
-    console.log("Token is valid. Generating pre-signed URLs...");
+    console.log("Token is valid. Fetching repository data...");
+    const repository = await Repository.findOne({ name: ourRepoName });
 
-    // Generate all URLs in parallel
-    const urlPromises = keyNames.map((keyName) => {
-      console.log(`Generating URL for: ${keyName}`);
+    if (!repository) {
+      console.error("Error: Repository not found", ourRepoName);
+      return res.status(404).json({ error: "Repository not found" });
+    }
 
-      const params = {
-        Bucket: S3_BUCKET,
-        Key: keyName,
-        Expires: 300,
-      };
-
-      return s3.getSignedUrlPromise("putObject", params);
-    });
-
-    // Wait for all URLs to be generated
-    const uploadUrls = await Promise.all(urlPromises);
-
-    console.log("Generated URLs:", uploadUrls);
-
-    res.json({ uploadUrls });
-  } catch (error) {
-    console.error("Error generating pre-signed URLs:", error);
-    res.status(500).json({ error: "Failed to generate pre-signed URLs" });
+   
+     // Check if localRepoId matches the stored localSystemId or if thePull is "done"
+if (repository.localSystemId !== theLocalRepoId || thePull === "done") {
+  
+  // If thePull is "done", check if pushNumber matches
+  if (thePull === "done") {
+    if (repository.pushNumber !== thePushNumber) {
+      console.error("Error: Push number mismatch.");
+      return res.status(409).json({ 
+        error: "Push conflict: Local pushNumber does not match repository pushNumber.", 
+        pushNumber: repository.pushNumber 
+      });
+    }
+    
+    // If pushNumber matches, SKIP localSystemId check and proceed
+  } else {
+    // If thePull is NOT "done", check localSystemId normally
+    if (repository.localSystemId !== theLocalRepoId) {
+      console.error("Error: Local repository ID does not match.");
+      return res.status(403).json({ 
+        error: "Access denied: Local repository ID does not match.", 
+        pushNumber: repository.pushNumber 
+      });
+    }
   }
 }
 
 
-async function generateMultiplePresignedUrls(req, res) {
-  try {
-    console.log("Received request body:", req.body); // Log entire request body
+      console.log("Local repository ID and pushNumber verified. Generating pre-signed URLs...");
 
-    const { keyNames, theToken } = req.body; // keyNames should be an array
+      // Generate all URLs in parallel
+      const urlPromises = keyNames.map((keyName) => {
+        console.log(`Generating URL for: ${keyName}`);
 
-    // Check if keyNames is an array
-    if (!Array.isArray(keyNames)) {
-      console.error("Error: keyNames is not an array", keyNames);
-      return res.status(400).json({ error: "keyNames must be an array" });
-    }
+        const params = {
+          Bucket: S3_BUCKET,
+          Key: keyName,
+          Expires: 300,
+        };
 
-    // Check if theToken exists
-    if (!theToken) {
-      console.error("Error: Missing theToken");
-      return res.status(400).json({ error: "Missing token" });
-    }
+        return s3.getSignedUrlPromise("putObject", params);
+      });
 
-    // Validate the token once
-    if (!isTokenValid(theToken)) {
-      console.error("Error: Token is invalid or expired", theToken);
-      return res.status(401).json({ error: "Unauthorized: Token is expired or invalid" });
-    }
+      // Wait for all URLs to be generated
+      const uploadUrls = await Promise.all(urlPromises);
 
-    console.log("Token is valid. Generating pre-signed URLs...");
+      console.log("Generated URLs:", uploadUrls);
 
-    // Generate all URLs in parallel
-    const urlPromises = keyNames.map((keyName) => {
-      console.log(`Generating URL for: ${keyName}`);
+      return res.json({ uploadUrls });
+    
+;
 
-      const params = {
-        Bucket: S3_BUCKET,
-        Key: keyName,
-        Expires: 300,
-      };
-
-      return s3.getSignedUrlPromise("putObject", params);
-    });
-
-    // Wait for all URLs to be generated
-    const uploadUrls = await Promise.all(urlPromises);
-
-    console.log("Generated URLs:", uploadUrls);
-
-    res.json({ uploadUrls });
   } catch (error) {
     console.error("Error generating pre-signed URLs:", error);
-    res.status(500).json({ error: "Failed to generate pre-signed URLs" });
+    return res.status(500).json({ error: "Failed to generate pre-signed URLs" });
   }
 }
+  
 
 async function generateDownloadUrls(req, res) {
   try {
@@ -920,6 +908,6 @@ module.exports = {
     findUsersAndRepositories,
     generateMultiplePresignedUrls,
     generateDownloadUrls,
-    checkVisibilityByName
+    checkVisibilityByName,
 }
 
