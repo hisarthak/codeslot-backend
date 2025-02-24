@@ -875,6 +875,34 @@ async function generateDownloadUrls(req, res) {
   }
 }
 
+async function checkVisibilityByName(req, res) {
+  const { name, username } = req.body; // Extract repository name & username from request body
+
+  try {
+    const repository = await Repository.findOne({ name });
+
+    // Extract repository owner from name (before "/")
+    const repoOwner = name.split("/")[0];
+
+    // If username matches repo owner, grant access
+    if (username === repoOwner) {
+      return res.json({ message: "Access" });
+    }
+
+    // If repository does not exist OR visibility is false, return "Not found"
+    if (!repository || !repository.visibility) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    // If repository exists and is visible, return "Access"
+    res.json({ message: "Access" });
+
+  } catch (err) {
+    console.error("Error retrieving repository visibility:", err.message);
+    res.status(500).send("Server error");
+  }
+}
+
 
 
 module.exports = {
@@ -892,5 +920,6 @@ module.exports = {
     findUsersAndRepositories,
     generateMultiplePresignedUrls,
     generateDownloadUrls,
+    checkVisibilityByName
 }
 

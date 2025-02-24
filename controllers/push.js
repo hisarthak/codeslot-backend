@@ -30,13 +30,25 @@ async function isLoggedIn() {
         if (userConfig.token) {
             try {
                 // Verify the JWT token (this will automatically check for expiration)
-                jwt.verify(userConfig.token, process.env.JWT_SECRET_KEY);
-                theToken = userConfig.token;
-                thePull = userConfig.push;
-                thePushNumber = userConfig.pushNumber;
-                theLocalRepoId = userConfig.localRepoId;
+                const response = await axios.post("https://gitspace.duckdns.org:3002/verifyToken", {
+                    token: userConfig.token,
+                });
+              
+    if (response.data.valid) {
+        theToken = userConfig.token;
+        thePull = userConfig.push;
+        thePushNumber = userConfig.pushNumber;
+        theLocalRepoId = userConfig.localRepoId;
 
-                return true; // Token is valid and not expired
+        console.log("✅ Token is valid.");
+        return true; // Token is valid
+    } else {
+        console.error("❌ Invalid token.");
+        return false; // Token is invalid
+    }
+
+
+               
             } catch (err) {
                 return false; // Invalid token or token is expired
             }
