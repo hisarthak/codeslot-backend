@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "major-project",
   "version": "1.0.0",
   "description": "Version control system",
   "main": "index.js",
@@ -7,7 +7,7 @@
     "slot": "./index.js"
   },
   "scripts": {
-    "start": "node index.js",
+    "start": "nodemon app.js",
     "start-tracker": "node tracker/file-tracker.js"
   },
   "config": {
@@ -23,26 +23,53 @@
     "slot"
   ],
   "dependencies": {
+    "@mapbox/mapbox-sdk": "^0.16.0",
     "aws-sdk": "^2.1691.0",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
     "chokidar": "^4.0.1",
+    "cli-progress": "^3.12.0",
+    "cloudinary": "^1.21.0",
+    "connect-flash": "^0.1.1",
+    "connect-mongo": "^5.1.0",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
-    "express": "^4.21.0",
+    "ejs": "^3.1.10",
+    "ejs-mate": "^4.0.0",
+    "express": "^4.21.1",
+    "express-session": "^1.18.0",
     "http": "^0.0.1-security",
+    "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
+    "method-override": "^3.0.0",
     "mongodb": "^6.9.0",
     "mongoose": "^8.7.0",
+    "mongoose-fuzzy-searching": "^2.0.2",
+    "multer": "^1.4.5-lts.1",
+    "multer-storage-cloudinary": "^4.0.0",
     "p-limit": "^6.1.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^8.0.0",
+    "readline-sync": "^1.4.10",
     "socket.io": "^4.8.0",
     "uuid": "^10.0.0",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
     "commitizen": "^4.3.1",
-    "cz-conventional-changelog": "^3.3.0"
+    "cz-conventional-changelog": "^3.3.0",
+    "prettier": "^3.3.3",
+    "prettier-plugin-ejs": "^1.0.3"
+  },
+  "overrides": {
+    "mongoose-fuzzy-searching": {
+      "mongoose": "^8.7.0"
+    }
+  },
+  "engines": {
+    "node": "20.15.0"
   }
 }

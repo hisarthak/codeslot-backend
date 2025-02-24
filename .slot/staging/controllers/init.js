@@ -101,6 +101,7 @@ async function captureFilesSnapshot(dir, snapshot, repoRoot) {
         commit_id: "",     // New field: empty string
         change: true,     // New field: false (no change initially)
         date: "",
+        pull: false,
       };
 
       // Recurse into the subdirectory
@@ -117,6 +118,7 @@ async function captureFilesSnapshot(dir, snapshot, repoRoot) {
         commit_id: "",     // New field: empty string
         change: true, 
         date : "",
+        pull : false
       };
     }
   }

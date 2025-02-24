@@ -41,6 +41,7 @@ function authenticateUser() {
                         username: username,
                     };
 
+                    
                     // Save config file
                     const configDir = path.join(process.cwd(), ".slot");
                     const configPath = path.join(configDir, "config.json");

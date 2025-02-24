@@ -778,6 +778,105 @@ async function generateMultiplePresignedUrls(req, res) {
 }
 
 
+async function generateMultiplePresignedUrls(req, res) {
+  try {
+    console.log("Received request body:", req.body); // Log entire request body
+
+    const { keyNames, theToken } = req.body; // keyNames should be an array
+
+    // Check if keyNames is an array
+    if (!Array.isArray(keyNames)) {
+      console.error("Error: keyNames is not an array", keyNames);
+      return res.status(400).json({ error: "keyNames must be an array" });
+    }
+
+    // Check if theToken exists
+    if (!theToken) {
+      console.error("Error: Missing theToken");
+      return res.status(400).json({ error: "Missing token" });
+    }
+
+    // Validate the token once
+    if (!isTokenValid(theToken)) {
+      console.error("Error: Token is invalid or expired", theToken);
+      return res.status(401).json({ error: "Unauthorized: Token is expired or invalid" });
+    }
+
+    console.log("Token is valid. Generating pre-signed URLs...");
+
+    // Generate all URLs in parallel
+    const urlPromises = keyNames.map((keyName) => {
+      console.log(`Generating URL for: ${keyName}`);
+
+      const params = {
+        Bucket: S3_BUCKET,
+        Key: keyName,
+        Expires: 300,
+      };
+
+      return s3.getSignedUrlPromise("putObject", params);
+    });
+
+    // Wait for all URLs to be generated
+    const uploadUrls = await Promise.all(urlPromises);
+
+    console.log("Generated URLs:", uploadUrls);
+
+    res.json({ uploadUrls });
+  } catch (error) {
+    console.error("Error generating pre-signed URLs:", error);
+    res.status(500).json({ error: "Failed to generate pre-signed URLs" });
+  }
+}
+
+async function generateDownloadUrls(req, res) {
+  try {
+    console.log("Received request body:", req.body);
+
+    const { keyNames, theToken } = req.body;
+
+    if (!Array.isArray(keyNames)) {
+      console.error("Error: keyNames is not an array", keyNames);
+      return res.status(400).json({ error: "keyNames must be an array" });
+    }
+
+    if (!theToken) {
+      console.error("Error: Missing theToken");
+      return res.status(400).json({ error: "Missing token" });
+    }
+
+    if (!isTokenValid(theToken)) {
+      console.error("Error: Token is invalid or expired", theToken);
+      return res.status(401).json({ error: "Unauthorized: Token is expired or invalid" });
+    }
+
+    console.log("Token is valid. Generating pre-signed URLs...");
+
+    const urlPromises = keyNames.map((keyName) => {
+      console.log(`Generating download URL for: ${keyName}`);
+
+      const params = {
+        Bucket: S3_BUCKET,
+        Key: keyName,
+        Expires: 300,
+      };
+
+      return s3.getSignedUrlPromise("getObject", params);
+    });
+
+    const uploadUrls = await Promise.all(urlPromises); // <- Renamed to match frontend expectation
+
+    console.log("Generated Download URLs:", uploadUrls);
+
+    res.json({ uploadUrls }); // <- Changed from downloadUrls to uploadUrls
+  } catch (error) {
+    console.error("Error generating pre-signed URLs:", error);
+    res.status(500).json({ error: "Failed to generate pre-signed URLs" });
+  }
+}
+
+
+
 module.exports = {
     repoFolderStructure,
     fetchFileContent,
@@ -791,5 +890,7 @@ module.exports = {
     deleteRepositoryById,
     fetchLogsFromS3,
     findUsersAndRepositories,
-    generateMultiplePresignedUrls
+    generateMultiplePresignedUrls,
+    generateDownloadUrls,
 }
+

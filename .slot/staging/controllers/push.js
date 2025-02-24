@@ -2,8 +2,15 @@ const fs = require("fs").promises;
 const path = require("path");
 const readline = require("readline");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const { s3, S3_BUCKET } = require("../config/aws-config");
+const cliProgress = require("cli-progress");
+
+
 let theToken;
+let thePull;
+let theLocalRepoId;
+let ourRepoName;
 
 
 const axios = require("axios");
@@ -25,6 +32,10 @@ async function isLoggedIn() {
                 // Verify the JWT token (this will automatically check for expiration)
                 jwt.verify(userConfig.token, process.env.JWT_SECRET_KEY);
                 theToken = userConfig.token;
+                thePull = userConfig.push;
+                thePushNumber = userConfig.pushNumber;
+                theLocalRepoId = userConfig.localRepoId;
+
                 return true; // Token is valid and not expired
             } catch (err) {
                 return false; // Invalid token or token is expired
@@ -103,10 +114,15 @@ function promptLogin() {
 
                     // Save token to .slot/config.json
                     const token = res.data.token;
+                    const localRepoId = crypto.randomUUID();
 
                     const userConfig = {
                         token: token,
                         username: username,
+                        localRepoId: localRepoId,
+                        pull: "not-required",
+                        pushNumber: 0
+                        
                     };
 
                     // Save config file
@@ -114,6 +130,9 @@ function promptLogin() {
                         path.join(process.cwd(), ".slot", "config.json"),
                         JSON.stringify(userConfig, null, 2)
                     );
+                    thePull = userConfig.pull;
+                    theLocalRepoId = userConfig.localRepoId;
+                    thePushNumber = userConfig.pushNumber;
                     resolve(token); // Return token after successful login
                 } catch (err) {
                     console.error(
@@ -128,6 +147,7 @@ function promptLogin() {
         });
     });
 }
+
 async function pushRepo() {
     const chalk = await import("chalk"); 
     const repoPath = path.resolve(process.cwd(), ".slot");
@@ -144,7 +164,7 @@ async function pushRepo() {
             await fs.access(remotePath);
         } catch(err) {
             console.log(err);
-            // console.error("Remote not set. Please set the remote repository using 'slot remote add <url>'.");
+            console.error("Remote not set. Please set the remote repository using 'slot remote add <url>'.");
             return;
         }
         const remoteData = await fs.readFile(remotePath, "utf8");
@@ -152,12 +172,24 @@ async function pushRepo() {
         const remoteUrl = remote.url;
         const match = remoteUrl.match(/^https:\/\/codeslot\.in\/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)$/);
         const repoName = match ? match[1] : null;
+ 
           if (!repoName) {
             throw new Error("Invalid repository name format.");
-        }      
+        } 
+        ourRepoName= repoName;     
         
         const loggedIn = await isLoggedIn();
         let token;
+        if (thePull === "required") {
+            console.error(`
+        error: failed to push some refs to 'https://codeslot.in/${ourRepoName}'
+        hint: Updates were rejected because the remote contains work that you do
+        hint: not have locally. This is usually caused by another repository pushing
+        hint: to the same ref. You may want to first integrate the remote changes
+        hint: (e.g., 'slot pull ...') before pushing again.
+            `);
+            process.exit(1); // Exit the process with a non-zero status code
+        }
         if (!loggedIn) {
            
             console.log(chalk.default.yellow("Authentication required, valid for 30 days."));
@@ -173,109 +205,237 @@ async function pushRepo() {
         // Read and parse logs.json
         const logs = JSON.parse(await fs.readFile(logsPath, "utf8"));
         
-        // Find the object with the highest count
-        const highestCountCommit = logs.reduce((max, commit) => 
-            commit.count > max.count ? commit : max, 
-            logs[0] || {}
-        );
+         // Find all commit IDs where push is true
+         const commitIdsToPush = logs.filter(commit => commit.push).map(commit => commit.commitID);
+     
+ 
+         // Set highestCountCommit based on commitIdsToPush
+         const highestCountCommit = commitIdsToPush.length > 0;
+ 
+         if (!highestCountCommit) {
+             console.log("Everything up-to-date");
+             return;
+         }
+         console.log("Commits to push:", commitIdsToPush);
 
-        // Check if the commit exists and push is true
-        if (!highestCountCommit || !highestCountCommit.push) {
-            console.log("Everything up-to-date");
-            return;
-        }
-        console.log(chalk.default.yellow("Pushing..."));
+        
+        // console.log(chalk.default.yellow("Pushing..."));
 
 
         // Read and validate commit.json
         const commitDirs = await fs.readdir(commitPath);
 
         for (const commitDir of commitDirs) {
-
-            const commitDirPath = path.join(commitPath, commitDir);
-          
-          
-
-            
-
-            // Recursively upload files and directories with correct paths
-            await uploadDirectoryToS3(commitDirPath, `commits/${repoName}/${commitDir}`, commitDirPath);
+            if (commitIdsToPush.includes(commitDir)) {
+                console.log(`Pushing ${chalk.default.yellow("commit")} ${chalk.default.yellow(commitDir)}`);
+                const commitDirPath = path.join(commitPath, commitDir);
+                
+                // Call uploadDirectoryToS3 and check the result
+                const result = await uploadDirectoryToS3(commitDirPath, `commits/${repoName}/${commitDir}`, commitDirPath);
+                
+                if (result.success === "pullError") {
+                    console.error("Pull required before pushing. Updating config file...");
+                    
+                    // Read user config file
+                    const configPath = path.join(__dirname, "..", ".slot", "config.json");
+                    const configData = await fs.readFile(configPath, "utf8");
+                    const userConfig = JSON.parse(configData);
+                    
+                    // Update values
+                    userConfig.pull = "required";
+                    userConfig.pushNumber = result.pushNumber;
+        
+                    // Write back to file
+                    await fs.writeFile(configPath, JSON.stringify(userConfig, null, 2), "utf8");
+        
+                    console.error(`
+                error: failed to push some refs to 'https://codeslot.in/${ourRepoName}'
+                hint: Updates were rejected because the remote contains work that you do
+                hint: not have locally. This is usually caused by another repository pushing
+                hint: to the same ref. You may want to first integrate the remote changes
+                hint: (e.g., 'slot pull ...') before pushing again.
+                    `);
+                    process.exit(1); // Stop execution
+                }
+            }
         }
-        const logsContent = await fs.readFile(logsPath, "utf8");
 
-        const logsS3Params = {
-            Bucket: S3_BUCKET,
-            Key: `commits/${repoName}/logs.json`,  // Save logs.json to the "commits/repoName" folder
-            Body: logsContent,
-        };
-        await s3.upload(logsS3Params).promise();  // Upload logs.json to S3
 
-        highestCountCommit.push = false;
+        
+        console.log("Saving changes...");
+         // Read user config file
+         const configPath = path.join(__dirname, "..", ".slot", "config.json");
+         const configData = await fs.readFile(configPath, "utf8");
+         const userConfig = JSON.parse(configData);
+         
+         // Update values
+         userConfig.pull = "not-required";
+      
+
+         // Write back to file
+         await fs.writeFile(configPath, JSON.stringify(userConfig, null, 2), "utf8");
+        
+      
+         logs.forEach(commit => {
+            if (commit.push) commit.push = false;
+        });
         // Write the updated logs.json back to file
         await fs.writeFile(logsPath, JSON.stringify(logs, null, 2), "utf8");
+        
+            const logsContent = await fs.readFile(logsPath, "utf8");
+            const logsKeyName = `commits/${repoName}/logs.json`;
+         
+            const response = await axios.post("https://gitspace.duckdns.org:3002/repo/user/url/generate-urls",
+                { keyNames: [logsKeyName], theToken },  // Fix 2: Wrap logsKeyName in an array
+                { headers: { "Content-Type": "application/json" } }
+            );
+        
+            const { uploadUrls } = response.data;
+            if (!uploadUrls || uploadUrls.length === 0) {
+                throw new Error("No upload URL received from server.");
+            }
+        
+            const uploadUrl = uploadUrls[0]; // Fix 1: Use correct index
+        
+            await axios.put(uploadUrl, logsContent, {
+                headers: { "Content-Type": "application/octet-stream" },
+                timeout: 30000,
+            });
+        
+          
+        
+  // Upload logs.json to S3
+
         console.log(chalk.default.green("Pushed successfully"));
     } catch (err) {
         console.error("Error during pushing commits: ", err.message);
     }
 }
 
-
-async function uploadDirectoryToS3(localPath, s3BasePath, rootPath) {
+async function uploadDirectoryToS3(localPath, s3BasePath, rootPath, progressBar = null, totalFilesCount = null) {
+    const { default: pLimit } = await import("p-limit");
+    const limit = pLimit(5);
     const items = await fs.readdir(localPath);
     const files = [];
     const directories = [];
 
-    // STEP 1: Collect all files and directories
     for (const item of items) {
         const itemPath = path.join(localPath, item);
         const stats = await fs.stat(itemPath);
 
         if (stats.isFile()) {
-            // Determine S3 key path
             const keyName = `${s3BasePath}/${path.relative(rootPath, itemPath).replace(/\\/g, "/")}`;
             files.push({ itemPath, keyName });
         } else if (stats.isDirectory()) {
-            // Store directories separately for recursive processing
             directories.push(itemPath);
         }
     }
 
-    // STEP 2: Request ALL pre-signed URLs at once for all files
     if (files.length > 0) {
         const keyNames = files.map(file => file.keyName);
-        const response = await fetch("https://gitspace.duckdns.org:3002/repo/user/details/generate-urls", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ keyNames, theToken }),
-        });
+        let response;
+        try {
+            response = await axios.post("https://gitspace.duckdns.org:3002/repo/user/url/generate-urls",
+                { keyNames, theToken, theLocalRepoId, thePull, ourRepoName, thePushNumber },
+                { headers: { "Content-Type": "application/json" } }
+            );
+        } catch (error) {
+            if (error.response && error.response.status === 403) {
+                console.error("403 Error: Local repository ID mismatch or unauthorized.");
+                const pushNumber = error.response.data.pushNumber;
+                return { success: "pullError", pushNumber }; // Return the pushNumber to the caller
+            } else {
+                console.error("Error fetching pre-signed URLs:", error);
+                return { success: "error", error: "Failed to fetch pre-signed URLs" };
+            }
+        }
 
-        const { uploadUrls } = await response.json(); // Backend returns all URLs
-
-        // STEP 3: Upload ALL files in parallel using Promise.all
-        await Promise.all(
-            files.map(async (file, index) => {
-                const fileContent = await fs.readFile(file.itemPath);
-                await fetch(uploadUrls[index], {
-                    method: "PUT",
-                    body: fileContent,
-                });
-                console.log(`Uploaded: ${file.keyName}`);
-            })
-        );
+        const { uploadUrls } = response.data;
+        
+    // 🔹 Create Progress Bar ONLY in the first function call
+    let isTopLevel = false;
+    if (!progressBar) {
+        isTopLevel = true;
+        totalFilesCount = { count: 0 }; // Initialize total count
+        progressBar = new cliProgress.SingleBar({
+            format: '{bar} {percentage}% | {value}/{total} files',
+            hideCursor: true
+        }, cliProgress.Presets.shades_classic);
     }
 
-    // STEP 4: Recursively upload directories (process them in parallel)
+    totalFilesCount.count += files.length; // Update total file count
+
+    if (isTopLevel) {
+        progressBar.start(totalFilesCount.count, 0); // Start progress bar in top-level call
+    } else {
+        progressBar.setTotal(totalFilesCount.count); // Update total file count
+    }
+
+
+        try {
+            await Promise.all(
+                files.map((file, index) => limit(async () => {
+                    try {
+                        await uploadFileWithRetry(file.itemPath, uploadUrls[index], progressBar);
+                    } catch (error) {
+                      
+                        throw error; // Stop execution if any upload fails
+                    }
+                }))
+            );
+        } catch (error) {
+           
+            return { success: "error", error: "File upload failed" };// Exit the function if an error occurs
+        }
+
+    // 🔹 Recursively process subdirectories with the SAME progress bar
     await Promise.all(
         directories.map(async (dir) => {
-            await uploadDirectoryToS3(dir, s3BasePath, rootPath);
+           await uploadDirectoryToS3(dir, s3BasePath, rootPath, progressBar, totalFilesCount);
+           
         })
     );
 
-    console.log("All files and directories uploaded!");
+    // 🔹 Stop progress bar ONLY in the top-level function call
+    if (isTopLevel) {
+        progressBar.stop();
+    }
+       return { success: true };
+}}
+
+// 🔹 Function to handle upload with retry mechanism
+async function uploadFileWithRetry(filePath, uploadUrl, progressBar, maxRetries = 3, timeout = 30000) {
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+        try {
+            const fileContent = await fs.readFile(filePath);
+
+            await axios.put(uploadUrl, fileContent, {
+                headers: { "Content-Type": "application/octet-stream" },
+                timeout: timeout,
+            });
+
+            progressBar.increment();
+            return;
+        } catch (error) {
+            attempt++;
+
+            if (attempt < maxRetries) {
+                const waitTime = Math.pow(2, attempt) * 1000;
+                await new Promise(resolve => setTimeout(resolve, waitTime));
+            } else {
+                console.error(`error`);
+                throw error;
+                
+            }
+        }
+    }
 }
-
-
 
 module.exports = {
     pushRepo,
 };
+
+
+

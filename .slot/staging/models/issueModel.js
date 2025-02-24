@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-
-
 const IssueSchema = new Schema({
     title: {
         type: String,

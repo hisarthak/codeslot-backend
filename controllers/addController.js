@@ -1,10 +1,11 @@
 const fs = require("fs").promises;
 const path = require("path");
 const crypto = require("crypto");
-
+let theDeletedFiles = [];
 
 // dkfaklf
 async function handleDeletedFiles(snapshot, stagingDir, slotIgnoreFile) {
+
   try {
     const ignorePatterns = await loadSlotIgnore(slotIgnoreFile);
     const stagingFiles = await fs.readdir(stagingDir);
@@ -12,21 +13,27 @@ async function handleDeletedFiles(snapshot, stagingDir, slotIgnoreFile) {
     for (const relativePath in snapshot) {
       const filePathInStaging = path.join(stagingDir, relativePath);
       const filePathInBackend = path.join(process.cwd(), relativePath);
+      
 
       if (relativePath.startsWith('.slot')) {
         delete snapshot[relativePath];
+       
         continue;
       }
 
       if (await isFileIgnored(filePathInBackend, ignorePatterns)) {
-        // delete snapshot[relativePath];
+       
         if (await fs.stat(filePathInStaging).catch(() => false)) {
+         
           try {
             await fs.rm(filePathInStaging, { recursive: true, force: true });
+           
+           
           } catch (deleteError) {
             console.error("Error deleting ignored file/folder from staging:", deleteError);
           }
         }
+        
         continue;
       }
 
@@ -36,6 +43,8 @@ async function handleDeletedFiles(snapshot, stagingDir, slotIgnoreFile) {
       if (!existsInStaging || !existsInBackend) {
         try {
           await fs.rm(filePathInStaging, { recursive: true, force: true });
+          
+          theDeletedFiles.push(relativePath);
           // delete snapshot[relativePath];
         } catch (deleteError) {
           console.error(`Error deleting ${filePathInStaging}:`, deleteError);
@@ -78,43 +87,43 @@ async function getFileInode(filePath) {
 }
 
 async function findTargetPath(targetName, snapshotPath, currentDir = process.cwd(), ignorePatterns = []) {
-  console.log("[START] findTargetPath called with:", { targetName, snapshotPath, currentDir});
+  // console.log("[START] findTargetPath called with:", { targetName, snapshotPath, currentDir});
 
   let resolvedPath;
-  console.log("Reading snapshot file:", snapshotPath);
+  // console.log("Reading snapshot file:", snapshotPath);
   const snapshotContent = await fs.readFile(snapshotPath, 'utf-8');
-  console.log("Snapshot content loaded");
+  // console.log("Snapshot content loaded");
   const snapshot = JSON.parse(snapshotContent);
   // console.log("Snapshot parsed:", snapshot);
 
   if (targetName.startsWith('/relative/')) {
-      console.log("Target is a relative path, resolving...");
+      // console.log("Target is a relative path, resolving...");
       targetName = targetName.replace('/relative/', '');
       resolvedPath = path.resolve(process.cwd(), targetName);
-      console.log("Resolved relative path:", resolvedPath);
+      // console.log("Resolved relative path:", resolvedPath);
       return resolvedPath;
   }
 
-  console.log("Starting directory scan in:", currentDir);
+  // console.log("Starting directory scan in:", currentDir);
   const entries = await fs.readdir(currentDir, { withFileTypes: true });
   let matches = [];
 
   for (const entry of entries) {
       const entryPath = path.resolve(currentDir, entry.name);
-      console.log("Checking entry:", entryPath);
+      // console.log("Checking entry:", entryPath);
 
       if (await isFileIgnored(entryPath, ignorePatterns)) {
-          console.log("Ignoring file:", entryPath);
+          // console.log("Ignoring file:", entryPath);
           continue;
       }
 
       if (entry.name === targetName) {
-          console.log("Match found:", entryPath);
+          // console.log("Match found:", entryPath);
           matches.push(entryPath);
       }
 
       if (entry.isDirectory()) {
-          console.log("Entering directory:", entryPath);
+          // console.log("Entering directory:", entryPath);
           const foundPaths = await findTargetPath(targetName, snapshotPath, entryPath, ignorePatterns);
           
           if (Array.isArray(foundPaths)) {
@@ -125,43 +134,43 @@ async function findTargetPath(targetName, snapshotPath, currentDir = process.cwd
       }
   }
 
-  console.log("Total matches found:", matches);
+  // console.log("Total matches found:", matches);
   if (matches.length === 0) {
-      console.log("No matches found, returning null.");
+      // console.log("No matches found, returning null.");
       return null;
   }
 
   if (matches.length === 1) {
-      console.log("Single match found, returning:", matches[0]);
+      // console.log("Single match found, returning:", matches[0]);
       return matches[0];
   }
 
-  console.log("Checking for modified matches...");
+  // console.log("Checking for modified matches...");
   let modifiedMatches = [];
   for (const match of matches) {  
       if (snapshot) {
-        console.log( "albela",match);
+        // console.log( "albela",match);
           try {
               const currentHash = await calculateFileHash(match);
               const relativeMatch = path.relative(process.cwd(), match);
-              console.log("File hash:", match, currentHash);
+              // console.log("File hash:", match, currentHash);
               console.log(snapshot.hash)
               if (currentHash && currentHash !== snapshot[relativeMatch]?.hash) {
-                  console.log("File modified:", match);
+                  // console.log("File modified:", match);
                   modifiedMatches.push(match);
               }
           } catch (error) {
-              console.error("Error calculating hash for:", match, error);
+              // console.error("Error calculating hash for:", match, error);
           }
       }
   }
 
   if (modifiedMatches.length === 1) {
-      console.log("Returning single modified match:", modifiedMatches[0]);
+      // console.log("Returning single modified match:", modifiedMatches[0]);
       return modifiedMatches[0];
   }
 
-  console.log("Multiple matches found, returning special message.");
+  // console.log("Multiple matches found, returning special message.");
   return "x17bcc3a699f-*#@%^&()+ask";
 }
 
@@ -173,9 +182,9 @@ async function addFileToRepo(targetName) {
   const ignorePatterns = await loadSlotIgnore(slotIgnoreFile);
 const targetPath = await findTargetPath(targetName, snapshotFile, process.cwd(), ignorePatterns);
 targetName = targetName.split('/').pop();
-console.log("Processed targetName:", targetName);
+// console.log("Processed targetName:", targetName);
 
-console.log(targetPath);
+// console.log(targetPath);
 
 if (targetPath === "x17bcc3a699f-*#@%^&()+ask") {
   console.error(`Multiple files or directories named "${targetName}" were found.
@@ -189,7 +198,7 @@ if (targetPath === "x17bcc3a699f-*#@%^&()+ask") {
 }
 
 const relativePath = path.relative(process.cwd(), targetPath);
-console.log("Relative path:", relativePath);
+console.log("Added:", relativePath);
 
   try {
 
@@ -229,9 +238,16 @@ console.log("Relative path:", relativePath);
         const fileHash = await calculateFileHash(targetPath);
         const oldFileSnapshot = snapshot[relativePath];
 
-        if (oldFileSnapshot && oldFileSnapshot.id === inode && oldFileSnapshot.hash === fileHash) {
-          return;
-        }
+        if (oldFileSnapshot) {
+          if (oldFileSnapshot.id === inode && oldFileSnapshot.hash === fileHash) {
+          
+              return;
+          }
+          if (oldFileSnapshot.id !== inode && oldFileSnapshot.hash === fileHash && oldFileSnapshot.pull === true) {
+             console.log("working")
+              return;
+          }
+      }
   
 
         const stagingFilePath = path.join(stagingDir, relativePath);
@@ -252,6 +268,7 @@ await fs.mkdir(stagingFileDir, { recursive: true });
           commit_Id: "",
           date : "",
           change: true,
+          pull: false,
              };
        
       }
@@ -320,7 +337,7 @@ await fs.mkdir(stagingFileDir, { recursive: true });
     await fs.writeFile(path.join(repoPath, "newSnapshot.json"), JSON.stringify(snapshot, null, 2));
     await fs.writeFile(snapshotFile, JSON.stringify(snapshot, null, 2));
 
-    console.log(`Operation complete`);
+    // console.log(`Operation complete`);
   } catch (err) {
     console.error("Error adding file or folder to repo:", err);
   }
@@ -358,8 +375,18 @@ async function addModifiedOrLogs() {
           const stagingDirPath = path.join(stagingDir, relativePath);
           await fs.mkdir(stagingDirPath, { recursive: true });
           
-          const matchedOldFile = Object.values(oldSnapshot).find((oldFile) => oldFile.id === inode);
-
+          let matchedOldFile = Object.values(oldSnapshot).find((oldFile) => oldFile.id === inode);
+  
+          if (!matchedOldFile) {
+            const potentialMatch = oldSnapshot[relativePath]; // Find match based on relative path
+           
+          
+            if (potentialMatch && potentialMatch.pull) {
+             
+              matchedOldFile = potentialMatch;
+            }
+          }
+              
 
           newSnapshot[relativePath] = { 
             id: inode,
@@ -372,6 +399,7 @@ async function addModifiedOrLogs() {
             change: matchedOldFile ? matchedOldFile.change : true,  // Get change field from oldSnapshot if inode matches
             date : matchedOldFile ? matchedOldFile.date: "",
             new: !matchedOldFile,
+            pull:  matchedOldFile ? matchedOldFile.pull : false
           };
           
           // Recurse into subdirectories
@@ -385,17 +413,21 @@ async function addModifiedOrLogs() {
           const stagingFilePath = path.join(stagingDir, relativePath);
           await fs.mkdir(path.dirname(stagingFilePath), { recursive: true }); // Ensure the directory exists
           await fs.writeFile(stagingFilePath, fileContent); // Write the file content
-    
-          const matchedOldFile = Object.values(oldSnapshot).find((oldFile) => oldFile.id === inode);
-          // Debugging output
-// console.log("Matched Old File:", matchedOldFile);
-if (matchedOldFile) {
-  // console.log("Old File ID:", matchedOldFile.id);
-  // console.log("Provided inode:", inode);
-} else {
-  // console.log("No match found for inode:", inode);
-}
+    let hi;
+    let matchedOldFile = Object.values(oldSnapshot).find((oldFile) => oldFile.id === inode);
 
+  
+    
+    if (!matchedOldFile) {
+      const potentialMatch = oldSnapshot[relativePath]; // Find match based on relative path
+    
+    
+      if (potentialMatch && potentialMatch.pull) {
+       
+        matchedOldFile = potentialMatch;
+      } 
+    }
+          
 newSnapshot[relativePath] = { 
             id: inode, 
             text: entry.name,
@@ -407,6 +439,7 @@ newSnapshot[relativePath] = {
             commit_id: matchedOldFile ? matchedOldFile.commit_id : "",
             change: matchedOldFile ? matchedOldFile.change : true,  // Get change field from oldSnapshot if inode matches
             date: matchedOldFile ? matchedOldFile.date : "",
+            pull: matchedOldFile ? matchedOldFile.pull : false,
           };
         }
       }
@@ -414,8 +447,14 @@ newSnapshot[relativePath] = {
 
 
     await processDirectory(process.cwd());
-
+let skip = false;
     for (const [relativePath, newFile] of Object.entries(newSnapshot)) {
+      
+      if(newFile.pull == true){
+        newSnapshot[relativePath].pull = false;
+        skip = true;
+      }
+      newFile.pull = false;
       const oldFile = Object.values(oldSnapshot).find((file) => file.id === newFile.id);
 let renameCount = false;
 
@@ -425,7 +464,7 @@ let renameCount = false;
  // Check if the file has been modified (hash has changed)
  if (oldFile.hash !== newFile.hash) {
  
-  console.log(chalk.default.blueBright("Modified:"),oldFile.text);
+  console.log(chalk.default.blueBright("Modified:"),oldFile.path);
   newSnapshot[relativePath].change = true; // Mark as changed
 }
 
@@ -433,6 +472,11 @@ let renameCount = false;
         if (oldFile.text !== newFile.text) {
           console.log(chalk.default.blueBright("Renamed:"),oldFile.text,"->",newFile.text);
           newSnapshot[relativePath].change = true; // Mark as changed
+           // Remove oldFile.path from theDeletedFiles if it exists
+  let index = theDeletedFiles.indexOf(oldFile.path);
+  if (index !== -1) {
+    theDeletedFiles.splice(index, 1);
+  }
           renameCount = true;
         }
    
@@ -444,21 +488,40 @@ let renameCount = false;
             renameCount = false;
            if(oldRelativePathDir !== relativePathDir){
               console.log(chalk.default.blueBright("Moved:"),newFile.text,"from",`${oldRelativePathDir}\\${newFile.text}`,"to",relativePath);
+              let index = theDeletedFiles.indexOf(`${oldRelativePathDir}\\${newFile.text}`);
+              if (index !== -1) {
+                theDeletedFiles.splice(index, 1);
+              }
               newSnapshot[relativePath].change = true; // Mark as changed
             }
           }else{
           console.log(chalk.default.blueBright("Moved:"),oldFile.text,"from",oldRelativePath,"to",relativePath);
+          let index = theDeletedFiles.indexOf(oldRelativePath);
+          if (index !== -1) {
+            theDeletedFiles.splice(index, 1);
+          }
+          
           newSnapshot[relativePath].change = true;
         }
         }
     
        
       } else {
+      if(skip==false){
         // New file or folder detected
-        console.log(`Created: ${relativePath}`);
+        console.log(chalk.default.blueBright("Created:")`${relativePath}`);
         newSnapshot[relativePath].change = true; // Mark as changed
+      }else{
+        skip=false
       }
+    }}
+
+    if (theDeletedFiles.length > 0) {
+      theDeletedFiles.forEach(file => {
+        console.log(chalk.default.blueBright("Deleted:"), file);
+      });
     }
+    
     async function checkFolderChanges(newSnapshot, relativePath) {
       let hasChangedChild = false;
     
