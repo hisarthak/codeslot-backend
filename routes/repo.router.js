@@ -13,7 +13,7 @@ repoRouter.get("/repo/name/:name", repoController.fetchRepositoryByName);
 repoRouter.get("/repo/user/:username", repoController.fetchRepositoriesForCurrentUser);
 
 repoRouter.post("/repo/user/url/generate-urls", repoController.generateMultiplePresignedUrls);
-repoRouter.post("/repo/user/url/generate-download-urls", repoController.generateDownloadUrls);
+repoRouter.post("/repo/user/download/get-url", repoController.generateDownloadUrls);
 // Details for a specific repository
 repoRouter.get("/repo/user/details/:reponame/logs", repoController.fetchLogsFromS3);
 repoRouter.get("/repo/user/details/:reponame/file/:filePath", repoController.fetchFileContent); // Changed to explicitly use 'file'
