@@ -826,7 +826,7 @@ async function generateDownloadUrls(req, res) {
   try {
     console.log("Received request body:", req.body);
 
-    const { keyNames, theToken } = req.body;
+    const { keyNames, theToken, theLocalRepoId, ourRepoName, } = req.body;
 
     if (!Array.isArray(keyNames)) {
       console.error("Error: keyNames is not an array", keyNames);
@@ -844,7 +844,19 @@ async function generateDownloadUrls(req, res) {
     }
 
     console.log("Token is valid. Generating pre-signed URLs...");
-
+    
+    if (ourRepoName) { // Only execute if ourRepoName is not null or undefined
+      const repository = await Repository.findOne({ name: ourRepoName });
+  
+      if (!repository) {
+          return res.status(404).json({ error: "Repository not found" });
+      }
+  
+      if (String(repository.localSystemId) === String(theLocalRepoId)) {
+          return res.status(200).json({ message: "not required" });
+      }
+  }
+  
     const urlPromises = keyNames.map((keyName) => {
       console.log(`Generating download URL for: ${keyName}`);
 
