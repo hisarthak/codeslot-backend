@@ -298,7 +298,7 @@ async function pushRepo() {
             const logsKeyName = `commits/${repoName}/logs.json`;
          
             const response = await axios.post("https://gitspace.duckdns.org:3002/repo/user/url/generate-urls",
-                { keyNames: [logsKeyName], theToken },  // Fix 2: Wrap logsKeyName in an array
+                { keyNames: [logsKeyName], theToken, theLocalRepoId, thePull, ourRepoName, thePushNumber },  // Fix 2: Wrap logsKeyName in an array
                 { headers: { "Content-Type": "application/json" } }
             );
         

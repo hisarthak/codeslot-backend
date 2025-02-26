@@ -728,55 +728,71 @@ function isTokenValid(token) {
 
 async function generateMultiplePresignedUrls(req, res) {
   try {
-    console.log("Received request body:", req.body); // Log entire request body
+    console.log("Received request body:"); // Log entire request body
 
     const { keyNames, theToken, theLocalRepoId, thePull, ourRepoName, thePushNumber } = req.body; // keyNames should be an array
 
     // Check if keyNames is an array
     if (!Array.isArray(keyNames)) {
-      console.error("Error: keyNames is not an array", keyNames);
+      // console.error("Error: keyNames is not an array", keyNames);
       return res.status(400).json({ error: "keyNames must be an array" });
     }
 
     // Check if theToken exists
     if (!theToken) {
-      console.error("Error: Missing theToken");
+      // console.error("Error: Missing theToken");
       return res.status(400).json({ error: "Missing token" });
     }
 
     // Validate the token once
     if (!isTokenValid(theToken)) {
-      console.error("Error: Token is invalid or expired", theToken);
+      // console.error("Error: Token is invalid or expired", theToken);
       return res.status(401).json({ error: "Unauthorized: Token is expired or invalid" });
     }
 
-    console.log("Token is valid. Fetching repository data...");
+    // console.log("Token is valid. Fetching repository data...");
     const repository = await Repository.findOne({ name: ourRepoName });
 
     if (!repository) {
-      console.error("Error: Repository not found", ourRepoName);
+      // console.error("Error: Repository not found", ourRepoName);
       return res.status(404).json({ error: "Repository not found" });
     }
 
     console.log("repository.localSystemId:", repository.localSystemId);
     console.log("theLocalRepoId:", theLocalRepoId);
 
-    // Authorization check (only if repository.localSystemId is NOT null)
     if (repository.localSystemId !== null) {
+      console.log("repository.localSystemId is NOT null:", repository.localSystemId);
+  
       if (thePull === "done") {
-        if (repository.pushNumber !== thePushNumber) {
-          return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
-        } else if (repository.localSystemId !== theLocalRepoId) {
-          return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
-        }
+          console.log("thePull is 'done'. Checking pushNumber...");
+  
+          if (repository.pushNumber !== thePushNumber) {
+              console.error("Push conflict: repository.pushNumber does NOT match thePushNumber");
+              return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
+          } else {
+              console.log("Push numbers match. Checking localSystemId...");
+          }
+  
+          if (repository.localSystemId !== theLocalRepoId) {
+              console.error("Access denied: repository.localSystemId does NOT match theLocalRepoId");
+              return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
+          } else {
+              console.log("localSystemId matches. Proceeding...");
+          }
+      } else {
+          console.log("thePull is NOT 'done'. Skipping pushNumber check.");
       }
-    }
+  } else {
+      console.log("repository.localSystemId is NULL. Skipping checks.");
+  }
+  
 
     console.log("Local repository ID and pushNumber verified. Generating pre-signed URLs...");
 
     // Generate all URLs in parallel
     const urlPromises = keyNames.map((keyName) => {
-      console.log(`Generating URL for: ${keyName}`);
+      // console.log(`Generating URL for: ${keyName}`);
 
       const params = {
         Bucket: S3_BUCKET,
@@ -790,7 +806,7 @@ async function generateMultiplePresignedUrls(req, res) {
     // Wait for all URLs to be generated
     const uploadUrls = await Promise.all(urlPromises);
 
-    console.log("Generated URLs:", uploadUrls);
+    // console.log("Generated URLs:", uploadUrls);
 
     // **Update repository.localSystemId and repository.pushNumber**
     repository.localSystemId = theLocalRepoId; // Assign new localSystemId
