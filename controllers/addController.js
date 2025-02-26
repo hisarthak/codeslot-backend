@@ -3,7 +3,6 @@ const path = require("path");
 const crypto = require("crypto");
 let theDeletedFiles = [];
 
-// dkfaklf
 async function handleDeletedFiles(snapshot, stagingDir, slotIgnoreFile) {
 
   try {

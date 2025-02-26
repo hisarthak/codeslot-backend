@@ -769,9 +769,11 @@ async function generateMultiplePresignedUrls(req, res) {
           if (repository.pushNumber !== thePushNumber) {
               console.error("Push conflict: repository.pushNumber does NOT match thePushNumber");
               return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
-          }}else if (String(repository.localSystemId) !== String(theLocalRepoId)){
+          }}else{
+            if(String(repository.localSystemId) !== String(theLocalRepoId)){
             console.error("Push conflict: repository.localSystemId does NOT match theLocalRepoId");
-            return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });    
+            return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });   
+            } 
       } }
 
     console.log("Local repository ID and pushNumber verified. Generating pre-signed URLs...");
