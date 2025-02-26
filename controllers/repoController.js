@@ -759,6 +759,14 @@ async function generateMultiplePresignedUrls(req, res) {
     }
     console.log("repository.localSystemId:", repository.localSystemId, "Type:", typeof repository.localSystemId, "Length:", repository.localSystemId.length);
     console.log("theLocalRepoId:", theLocalRepoId, "Type:", typeof theLocalRepoId, "Length:", theLocalRepoId.length);
+    if (String(repository.localSystemId) !== String(theLocalRepoId)){
+      console.error("Access denied: repository.localSystemId does NOT match theLocalRepoId");
+      return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
+  } 
+  if (repository.localSystemId !== theLocalRepoId){
+    console.error("Access denied: repository.localSystemId does NOT match theLocalRepoId");
+    return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
+} 
 
     if (repository.localSystemId !== null) {
       console.log("repository.localSystemId is NOT null:", repository.localSystemId);
