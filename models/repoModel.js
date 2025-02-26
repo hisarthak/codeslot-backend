@@ -37,6 +37,10 @@ const RepositorySchema = new Schema(
       type: Number,
       default: 0,
     },
+    pullCheck:{
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true } // Automatically manage createdAt and updatedAt fields
 );
