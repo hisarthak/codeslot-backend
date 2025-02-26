@@ -758,63 +758,59 @@ async function generateMultiplePresignedUrls(req, res) {
       return res.status(404).json({ error: "Repository not found" });
     }
 
-   
-     // Check if localRepoId matches the stored localSystemId or if thePull is "done"
-if (repository.localSystemId !== theLocalRepoId || thePull === "done") {
-  
-  // If thePull is "done", check if pushNumber matches
-  if (thePull === "done") {
-    if (repository.pushNumber !== thePushNumber) {
-      console.error("Error: Push number mismatch.");
-      return res.status(409).json({ 
-        error: "Push conflict: Local pushNumber does not match repository pushNumber.", 
-        pushNumber: repository.pushNumber 
-      });
+    console.log("repository.localSystemId:", repository.localSystemId);
+    console.log("theLocalRepoId:", theLocalRepoId);
+
+    // Authorization check (only if repository.localSystemId is NOT null)
+    if (repository.localSystemId !== null) {
+      if (thePull === "done") {
+        if (repository.pushNumber !== thePushNumber) {
+          return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
+        } else if (repository.localSystemId !== theLocalRepoId) {
+          return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
+        }
+      }
     }
-    
-    // If pushNumber matches, SKIP localSystemId check and proceed
-  } else {
-    // If thePull is NOT "done", check localSystemId normally
-    if (repository.localSystemId !== theLocalRepoId) {
-      console.error("Error: Local repository ID does not match.");
-      return res.status(403).json({ 
-        error: "Access denied: Local repository ID does not match.", 
-        pushNumber: repository.pushNumber 
-      });
-    }
-  }
-}
 
+    console.log("Local repository ID and pushNumber verified. Generating pre-signed URLs...");
 
-      console.log("Local repository ID and pushNumber verified. Generating pre-signed URLs...");
+    // Generate all URLs in parallel
+    const urlPromises = keyNames.map((keyName) => {
+      console.log(`Generating URL for: ${keyName}`);
 
-      // Generate all URLs in parallel
-      const urlPromises = keyNames.map((keyName) => {
-        console.log(`Generating URL for: ${keyName}`);
+      const params = {
+        Bucket: S3_BUCKET,
+        Key: keyName,
+        Expires: 300,
+      };
 
-        const params = {
-          Bucket: S3_BUCKET,
-          Key: keyName,
-          Expires: 300,
-        };
+      return s3.getSignedUrlPromise("putObject", params);
+    });
 
-        return s3.getSignedUrlPromise("putObject", params);
-      });
+    // Wait for all URLs to be generated
+    const uploadUrls = await Promise.all(urlPromises);
 
-      // Wait for all URLs to be generated
-      const uploadUrls = await Promise.all(urlPromises);
+    console.log("Generated URLs:", uploadUrls);
 
-      console.log("Generated URLs:", uploadUrls);
+    // **Update repository.localSystemId and repository.pushNumber**
+    repository.localSystemId = theLocalRepoId; // Assign new localSystemId
+    repository.pushNumber += 1; // Increment pushNumber
 
-      return res.json({ uploadUrls });
-    
-;
+    await repository.save(); // Save changes to the database
+
+    console.log("Updated repository:", {
+      localSystemId: repository.localSystemId,
+      pushNumber: repository.pushNumber,
+    });
+
+    return res.json({ uploadUrls });
 
   } catch (error) {
     console.error("Error generating pre-signed URLs:", error);
     return res.status(500).json({ error: "Failed to generate pre-signed URLs" });
   }
 }
+
   
 
 async function generateDownloadUrls(req, res) {

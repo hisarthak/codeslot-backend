@@ -11,11 +11,6 @@ const RepositorySchema = new Schema(
     description: {
       type: String,
     },
-    content: [
-      {
-        type: String,
-      },
-    ],
     visibility: {
       type: Boolean,
     },
@@ -24,18 +19,24 @@ const RepositorySchema = new Schema(
       ref: "User",
       required: true,
     },
-    issues: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Issue",
-      },
-    ],
-    // New field to store usernames of users who starred the repository
+  
+    // Field to store usernames of users who starred the repository
     starredBy: [
       {
         type: String, // Store usernames directly as strings
       },
     ],
+    // Each repository can have only one unique localSystemId
+    localSystemId: {
+      type: String,
+      unique: true,  // Ensures no duplicate localSystemIds
+      sparse: true,  // Allows some repositories to not have a localSystemId
+    },
+    // Push number with a default value of 0
+    pushNumber: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true } // Automatically manage createdAt and updatedAt fields
 );
