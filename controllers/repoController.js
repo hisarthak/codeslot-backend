@@ -757,43 +757,22 @@ async function generateMultiplePresignedUrls(req, res) {
       // console.error("Error: Repository not found", ourRepoName);
       return res.status(404).json({ error: "Repository not found" });
     }
-    console.log("repository.localSystemId:", repository.localSystemId, "Type:", typeof repository.localSystemId, "Length:", repository.localSystemId.length);
-    console.log("theLocalRepoId:", theLocalRepoId, "Type:", typeof theLocalRepoId, "Length:", theLocalRepoId.length);
-    if (String(repository.localSystemId) !== String(theLocalRepoId)){
-      console.error("Access denied: repository.localSystemId does NOT match theLocalRepoId");
-      return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
-  } 
-  if (repository.localSystemId !== theLocalRepoId){
-    console.error("Access denied: repository.localSystemId does NOT match theLocalRepoId");
-    return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
-} 
+
+    console.log("repository.localSystemId:", repository.localSystemId);
+    console.log("theLocalRepoId:", theLocalRepoId);
 
     if (repository.localSystemId !== null) {
       console.log("repository.localSystemId is NOT null:", repository.localSystemId);
-  
+     
       if (thePull === "done") {
           console.log("thePull is 'done'. Checking pushNumber...");
-  
           if (repository.pushNumber !== thePushNumber) {
               console.error("Push conflict: repository.pushNumber does NOT match thePushNumber");
               return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
-          } else {
-              console.log("Push numbers match. Checking localSystemId...");
-          }
-  
-          if (String(repository.localSystemId) !== String(theLocalRepoId)){
-              console.error("Access denied: repository.localSystemId does NOT match theLocalRepoId");
-              return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
-          } else {
-              console.log("localSystemId matches. Proceeding...");
-          }
-      } else {
-          console.log("thePull is NOT 'done'. Skipping pushNumber check.");
-      }
-  } else {
-      console.log("repository.localSystemId is NULL. Skipping checks.");
-  }
-  
+          }}else if (String(repository.localSystemId) !== String(theLocalRepoId)){
+            console.error("Push conflict: repository.localSystemId does NOT match theLocalRepoId");
+            return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });    
+      } }
 
     console.log("Local repository ID and pushNumber verified. Generating pre-signed URLs...");
 
