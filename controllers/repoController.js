@@ -757,9 +757,8 @@ async function generateMultiplePresignedUrls(req, res) {
       // console.error("Error: Repository not found", ourRepoName);
       return res.status(404).json({ error: "Repository not found" });
     }
-
-    console.log("repository.localSystemId:", repository.localSystemId);
-    console.log("theLocalRepoId:", theLocalRepoId);
+    console.log("repository.localSystemId:", repository.localSystemId, "Type:", typeof repository.localSystemId, "Length:", repository.localSystemId.length);
+    console.log("theLocalRepoId:", theLocalRepoId, "Type:", typeof theLocalRepoId, "Length:", theLocalRepoId.length);
 
     if (repository.localSystemId !== null) {
       console.log("repository.localSystemId is NOT null:", repository.localSystemId);
@@ -774,7 +773,7 @@ async function generateMultiplePresignedUrls(req, res) {
               console.log("Push numbers match. Checking localSystemId...");
           }
   
-          if (repository.localSystemId !== theLocalRepoId) {
+          if (String(repository.localSystemId) !== String(theLocalRepoId)){
               console.error("Access denied: repository.localSystemId does NOT match theLocalRepoId");
               return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
           } else {
