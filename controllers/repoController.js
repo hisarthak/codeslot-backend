@@ -761,7 +761,7 @@ async function generateMultiplePresignedUrls(req, res) {
     console.log("repository.localSystemId:", repository.localSystemId);
     console.log("theLocalRepoId:", theLocalRepoId);
 
-    if (repository.localSystemId !== null) {
+    if (repository.localSystemId != null) {
       console.log("repository.localSystemId is NOT null:", repository.localSystemId);
      
       if (thePull === "done") {
