@@ -763,7 +763,7 @@ async function generateMultiplePresignedUrls(req, res) {
        const pushTime = new Date(repository.pushTime);
        const timeDifference = (currentTime - pushTime) / (1000 * 60); // Convert milliseconds to minutes
  
-       if (timeDifference <= 2) {
+       if (timeDifference <= 1) {
          Pushing = true;
        }
      }
@@ -847,7 +847,8 @@ async function generateDownloadUrls(req, res) {
       if (!repository) {
           return res.status(404).json({ error: "Repository not found" });
       }
-      if (repository.pushNumber !== thePushNumber) {
+  
+      if (repository.pushNumber == thePushNumber) {
           return res.status(200).json({ message: "not required" });
       }
   
