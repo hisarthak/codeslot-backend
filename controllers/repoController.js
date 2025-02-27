@@ -822,7 +822,7 @@ async function generateDownloadUrls(req, res) {
   try {
     console.log("Received request body:", req.body);
 
-    const { keyNames, theToken, ourRepoName, thePushNumber } = req.body;
+    const { keyNames, theToken, ourRepoName, thePushNumber, clone } = req.body;
 
     if (!Array.isArray(keyNames)) {
       console.error("Error: keyNames is not an array", keyNames);
@@ -840,9 +840,9 @@ async function generateDownloadUrls(req, res) {
     }
 
     console.log("Token is valid. Generating pre-signed URLs...");
-
-
-      const repository = await Repository.findOne({ name: ourRepoName });
+let repository;
+if(!clone){
+       repository = await Repository.findOne({ name: ourRepoName });
   
       if (!repository) {
           return res.status(404).json({ error: "Repository not found" });
@@ -850,7 +850,7 @@ async function generateDownloadUrls(req, res) {
   
       if (repository.pushNumber == thePushNumber) {
           return res.status(200).json({ message: "not required" });
-      }
+      }}
   
   
     const urlPromises = keyNames.map((keyName) => {
@@ -868,8 +868,8 @@ async function generateDownloadUrls(req, res) {
     const uploadUrls = await Promise.all(urlPromises); // <- Renamed to match frontend expectation
 
     console.log("Generated Download URLs:", uploadUrls);
-
-    res.json({ uploadUrls, pushNumber: repository.pushNumber }); // <- Changed from downloadUrls to uploadUrls
+    const pushNumberResponse = clone ? 0 : repository.pushNumber;
+    res.json({ uploadUrls, pushNumber: pushNumberResponse }); // <- Changed from downloadUrls to uploadUrls
   } catch (error) {
     console.error("Error generating pre-signed URLs:", error);
     res.status(500).json({ error: "Failed to generate pre-signed URLs" });
