@@ -730,8 +730,8 @@ async function generateMultiplePresignedUrls(req, res) {
   try {
     console.log("Received request body:"); // Log entire request body
 
-    const { keyNames, theToken, theLocalRepoId, thePull, ourRepoName, thePushNumber } = req.body; // keyNames should be an array
-
+    const { keyNames, theToken, ourRepoName, thePushNumber } = req.body; // keyNames should be an array
+    let Pushing= false;
     // Check if keyNames is an array
     if (!Array.isArray(keyNames)) {
       // console.error("Error: keyNames is not an array", keyNames);
@@ -757,29 +757,26 @@ async function generateMultiplePresignedUrls(req, res) {
       // console.error("Error: Repository not found", ourRepoName);
       return res.status(404).json({ error: "Repository not found" });
     }
+     // **Check if pushTime is within the last 5 minutes**
+     const currentTime = new Date();
+     if (repository.pushTime) {
+       const pushTime = new Date(repository.pushTime);
+       const timeDifference = (currentTime - pushTime) / (1000 * 60); // Convert milliseconds to minutes
+ 
+       if (timeDifference <= 2) {
+         Pushing = true;
+       }
+     }
 
-    console.log("repository.localSystemId:", repository.localSystemId);
-    console.log("theLocalRepoId:", theLocalRepoId);
-
-    if (repository.localSystemId != null) {
-      console.log("repository.localSystemId is NOT null:", repository.localSystemId);
      
-      if (thePull === "done" && repository.pullCheck===false) {
-          console.log("thePull is 'done'. Checking pushNumber...");
-          if (repository.pushNumber !== thePushNumber) {
+    
+      if (!Pushing && repository.pushNumber !== thePushNumber) {
               console.error("Push conflict: repository.pushNumber does NOT match thePushNumber");
               return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });
           }
-          repository.pullCheck=true;
-              await repository.save();
-        }else{
-            if(String(repository.localSystemId) !== String(theLocalRepoId)){
-              repository.pullCheck=false;
-              await repository.save();
-            console.error("Push conflict: repository.localSystemId does NOT match theLocalRepoId");
-            return res.status(403).json({ error: "Access denied", pushNumber: repository.pushNumber });   
-            } 
-      } }
+       
+             
+      
 
     console.log("Local repository ID and pushNumber verified. Generating pre-signed URLs...");
 
@@ -801,8 +798,7 @@ async function generateMultiplePresignedUrls(req, res) {
 
     // console.log("Generated URLs:", uploadUrls);
 
-    // **Update repository.localSystemId and repository.pushNumber**
-    repository.localSystemId = theLocalRepoId; // Assign new localSystemId
+    repository.pushTime = new Date();
     repository.pushNumber += 1; // Increment pushNumber
 
     await repository.save(); // Save changes to the database
@@ -812,7 +808,7 @@ async function generateMultiplePresignedUrls(req, res) {
       pushNumber: repository.pushNumber,
     });
 
-    return res.json({ uploadUrls });
+    return res.json({ uploadUrls, pushNumber: repository.pushNumber });
 
   } catch (error) {
     console.error("Error generating pre-signed URLs:", error);
@@ -826,7 +822,7 @@ async function generateDownloadUrls(req, res) {
   try {
     console.log("Received request body:", req.body);
 
-    const { keyNames, theToken, theLocalRepoId, ourRepoName, } = req.body;
+    const { keyNames, theToken, ourRepoName, thePushNumber } = req.body;
 
     if (!Array.isArray(keyNames)) {
       console.error("Error: keyNames is not an array", keyNames);
@@ -844,18 +840,17 @@ async function generateDownloadUrls(req, res) {
     }
 
     console.log("Token is valid. Generating pre-signed URLs...");
-    
-    if (ourRepoName) { // Only execute if ourRepoName is not null or undefined
+
+
       const repository = await Repository.findOne({ name: ourRepoName });
   
       if (!repository) {
           return res.status(404).json({ error: "Repository not found" });
       }
-  
-      if (String(repository.localSystemId) === String(theLocalRepoId)) {
+      if (repository.pushNumber !== thePushNumber) {
           return res.status(200).json({ message: "not required" });
       }
-  }
+  
   
     const urlPromises = keyNames.map((keyName) => {
       console.log(`Generating download URL for: ${keyName}`);
@@ -873,7 +868,7 @@ async function generateDownloadUrls(req, res) {
 
     console.log("Generated Download URLs:", uploadUrls);
 
-    res.json({ uploadUrls }); // <- Changed from downloadUrls to uploadUrls
+    res.json({ uploadUrls, pushNumber: repository.pushNumber }); // <- Changed from downloadUrls to uploadUrls
   } catch (error) {
     console.error("Error generating pre-signed URLs:", error);
     res.status(500).json({ error: "Failed to generate pre-signed URLs" });

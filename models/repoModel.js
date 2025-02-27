@@ -26,21 +26,15 @@ const RepositorySchema = new Schema(
         type: String, // Store usernames directly as strings
       },
     ],
-    // Each repository can have only one unique localSystemId
-    localSystemId: {
-      type: String,
-      unique: true,  // Ensures no duplicate localSystemIds
-      sparse: true,  // Allows some repositories to not have a localSystemId
-    },
     // Push number with a default value of 0
     pushNumber: {
       type: Number,
       default: 0,
     },
-    pullCheck:{
-      type: Boolean,
-      default: false,
-    }
+    pushTime:{
+      type: Date, 
+      default: Date.now,
+    },
   },
   { timestamps: true } // Automatically manage createdAt and updatedAt fields
 );
