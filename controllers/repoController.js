@@ -272,7 +272,7 @@ async function updateRepositoryByRepoName(req, res) {
 async function toggleVisibilityById(req, res) {
   await Repository.deleteMany({});
   console.log("success");
-res.jon({true});
+res.json({true: hi});
   const { id } = req.params;
   const { userId } = req.query; // Extract userId from query
 
