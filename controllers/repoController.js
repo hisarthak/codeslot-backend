@@ -36,94 +36,94 @@ async function createRepository(req, res) {
   console.log("success");
 return res.status(200).json({
  message: "ok"
-});
+});}
 
   
-  const { username, owner, name, issues, content, description, visibility } = req.body;
-console.log("hi",description);
-console.log(username);
-  try {
-      console.log("Received repository creation request for:", { username, owner, name, description });
+//   const { username, owner, name, issues, content, description, visibility } = req.body;
+// console.log("hi",description);
+// console.log(username);
+//   try {
+//       console.log("Received repository creation request for:", { username, owner, name, description });
 
-      // Normalize and trim repository name
-      let trimmedName = name.trim().replace(/\s+/g, ' '); // Removes extra spaces and ensures single spaces between words
+//       // Normalize and trim repository name
+//       let trimmedName = name.trim().replace(/\s+/g, ' '); // Removes extra spaces and ensures single spaces between words
 
-      if (/\s/.test(name)) {
-          console.log("Repository name contains spaces.");
-          return res.status(400).json({ error: "No spaces allowed in repository name." });
-      }
+//       if (/\s/.test(name)) {
+//           console.log("Repository name contains spaces.");
+//           return res.status(400).json({ error: "No spaces allowed in repository name." });
+//       }
 
-      if (!trimmedName) {
-          console.log("Repository name is empty.");
-          return res.status(400).json({ error: "Repository name is required!" });
-      }
+//       if (!trimmedName) {
+//           console.log("Repository name is empty.");
+//           return res.status(400).json({ error: "Repository name is required!" });
+//       }
 
-      // Validate the repository name
-      const repoNameRegex = /^(?!-)[a-zA-Z0-9-_ ]*(?<!-)$/; // No hyphen at start or end
-      const hasLetter = /[a-zA-Z]/.test(trimmedName); // Must contain at least one letter
+//       // Validate the repository name
+//       const repoNameRegex = /^(?!-)[a-zA-Z0-9-_ ]*(?<!-)$/; // No hyphen at start or end
+//       const hasLetter = /[a-zA-Z]/.test(trimmedName); // Must contain at least one letter
 
-      if (!repoNameRegex.test(trimmedName) || !hasLetter) {
-          console.log("Invalid repository name format.");
-          return res.status(400).json({
-              error: "Repository name must contain at least one letter, and hyphens cannot be at the start or end."
-          });
-      }
+//       if (!repoNameRegex.test(trimmedName) || !hasLetter) {
+//           console.log("Invalid repository name format.");
+//           return res.status(400).json({
+//               error: "Repository name must contain at least one letter, and hyphens cannot be at the start or end."
+//           });
+//       }
 
-      // Append the username to the trimmed repository name
-      trimmedName = `${username}/${trimmedName}`;
+//       // Append the username to the trimmed repository name
+//       trimmedName = `${username}/${trimmedName}`;
 
-      if (!mongoose.Types.ObjectId.isValid(owner)) {
-          console.log("Invalid User ID.");
-          return res.status(400).json({ error: "Invalid User ID!" });
-      }
+//       if (!mongoose.Types.ObjectId.isValid(owner)) {
+//           console.log("Invalid User ID.");
+//           return res.status(400).json({ error: "Invalid User ID!" });
+//       }
 
-      console.log("Checking if user exists...");
-      const user = await User.findById(owner);
-      if (!user) {
-          console.log("User not found.");
-          return res.status(404).json({ error: "User not found!" });
-      }
+//       console.log("Checking if user exists...");
+//       const user = await User.findById(owner);
+//       if (!user) {
+//           console.log("User not found.");
+//           return res.status(404).json({ error: "User not found!" });
+//       }
 
       
-      console.log("User found:", { userId: user._id, username: user.username });
-      const repoDescription = description && description.trim() ? description.trim() : "No description provided";
-      // Create the new repository object
-      const newRepository = new Repository({
-          name: trimmedName,
-          description: repoDescription, 
-          visibility,
-          owner,
-          content,
-          issues,
-      });
+//       console.log("User found:", { userId: user._id, username: user.username });
+//       const repoDescription = description && description.trim() ? description.trim() : "No description provided";
+//       // Create the new repository object
+//       const newRepository = new Repository({
+//           name: trimmedName,
+//           description: repoDescription, 
+//           visibility,
+//           owner,
+//           content,
+//           issues,
+//       });
 
-      console.log("Saving repository...");
-      const savedRepo = await newRepository.save();
-      console.log("Repository saved:", { repoId: savedRepo._id, name: savedRepo.name, description: savedRepo.description });
+//       console.log("Saving repository...");
+//       const savedRepo = await newRepository.save();
+//       console.log("Repository saved:", { repoId: savedRepo._id, name: savedRepo.name, description: savedRepo.description });
 
-      // Add the new repository ID to the user's repositories array
-      user.repositories.push(savedRepo._id);
-      console.log("Updating user with new repository...");
-      await user.save();
-      console.log("User updated with new repository:", { userId: user._id, repoId: savedRepo._id });
+//       // Add the new repository ID to the user's repositories array
+//       user.repositories.push(savedRepo._id);
+//       console.log("Updating user with new repository...");
+//       await user.save();
+//       console.log("User updated with new repository:", { userId: user._id, repoId: savedRepo._id });
 
-      res.status(201).json({
-          message: "Repository created!",
-          repositoryID: savedRepo._id,
-      });
-  } catch (err) {
-      if (err.code === 11000 && err.keyValue && err.keyValue.name) {
-          console.log("Repository name already exists.");
-          return res.status(400).json({ err: "Repository name already exists" });
-      }
+//       res.status(201).json({
+//           message: "Repository created!",
+//           repositoryID: savedRepo._id,
+//       });
+//   } catch (err) {
+//       if (err.code === 11000 && err.keyValue && err.keyValue.name) {
+//           console.log("Repository name already exists.");
+//           return res.status(400).json({ err: "Repository name already exists" });
+//       }
 
-      console.error("Error creating repository:", err.message);
-      return res.status(500).json({
-          err: "An unexpected error occurred. Please try again.",
-          details: err.message,
-      });
-  }
-}
+//       console.error("Error creating repository:", err.message);
+//       return res.status(500).json({
+//           err: "An unexpected error occurred. Please try again.",
+//           details: err.message,
+//       });
+//   }
+// }
 
 
 
