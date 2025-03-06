@@ -32,6 +32,10 @@ async function connectClient() {
 }
 
 async function createRepository(req, res) {
+  await Repository.deleteMany({});
+  console.log("success");
+res.json({"hi": "hi"});
+return;
   
   const { username, owner, name, issues, content, description, visibility } = req.body;
 console.log("hi",description);
@@ -270,9 +274,7 @@ async function updateRepositoryByRepoName(req, res) {
 
 
 async function toggleVisibilityById(req, res) {
-  await Repository.deleteMany({});
-  console.log("success");
-res.json({true: hi});
+ 
   const { id } = req.params;
   const { userId } = req.query; // Extract userId from query
 
