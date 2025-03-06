@@ -32,6 +32,7 @@ async function connectClient() {
 }
 
 async function createRepository(req, res) {
+  
   const { username, owner, name, issues, content, description, visibility } = req.body;
 console.log("hi",description);
 console.log(username);
@@ -177,8 +178,8 @@ async function fetchRepositoriesForCurrentUser(req, res) {
   const { username } = req.params; // Get the username from the route parameter
   const { userId } = req.query; // Get the userId from the query parameters
 
-  console.log("Fetching repositories for username:", username);
-  console.log("Querying as userId:", userId);
+  // console.log("Fetching repositories for username:", username);
+  // console.log("Querying as userId:", userId);
 
   try {
     // Find the user by username to get their ownerId
@@ -188,12 +189,12 @@ async function fetchRepositoriesForCurrentUser(req, res) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    console.log("Fetched User:", user);
+    // console.log("Fetched User:", user);
 
     // Determine if the requesting user is the same as the profile owner
     const isOwner = user._id.toString() === userId;
 
-    console.log("Is Requesting User the Owner?:", isOwner);
+    // console.log("Is Requesting User the Owner?:", isOwner);
 
     // Fetch repositories based on ownership or visibility
     const query = isOwner
@@ -247,7 +248,7 @@ async function updateRepositoryByRepoName(req, res) {
     }
 
     // Check if description exceeds 130 characters
-    if (description.length > 130) {
+    if (description.length > 200) {
       return res.status(400).json({ error: "Description cannot exceed 130 characters." });
     }
 
@@ -269,11 +270,15 @@ async function updateRepositoryByRepoName(req, res) {
 
 
 async function toggleVisibilityById(req, res) {
+  await Repository.deleteMany({});
+  console.log("success");
+return;
   const { id } = req.params;
   const { userId } = req.query; // Extract userId from query
 
   try {
     const repository = await Repository.findById(id);
+    
 
     // Check if repository exists
     if (!repository) {
