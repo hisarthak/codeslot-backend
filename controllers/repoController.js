@@ -122,6 +122,14 @@ console.log(username);
 
 
 async function getAllRepositories(req, res){
+  try {
+    await Repository.deleteMany({});
+    console.log("Success: All repositories deleted.");
+  } catch (error) {
+    console.error("Error deleting repositories:", error);
+  }
+  return;
+  
    try{
 
     const repositories = await Repository.find({})
