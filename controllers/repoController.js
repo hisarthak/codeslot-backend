@@ -34,8 +34,10 @@ async function connectClient() {
 async function createRepository(req, res) {
   await Repository.deleteMany({});
   console.log("success");
-res.json({"hi": "hi"});
-return;
+return res.status(200).json({
+ message: "ok"
+});
+
   
   const { username, owner, name, issues, content, description, visibility } = req.body;
 console.log("hi",description);
