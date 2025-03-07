@@ -82,46 +82,53 @@ async function signup (req,res){
 };
 
 async function login(req, res) {
-    let { username, password } = req.body; // Replace email with username
-    username = username?.trim().toLowerCase();
-    password = password?.trim();
+  let { username, password } = req.body; // Replace email with username
+  username = username?.trim().toLowerCase();
+  password = password?.trim();
 
-    if (req.query.allow === "kfajlfd2934") {
+  if (req.query.allow === "kfajlfd2934") {
       username = autoLoginName;
       password = autoLoginCode;
   }
-    try {
-        await connectClient();
-        const db = client.db("githubclone");
-        const usersCollection = db.collection("users");
 
-        // Find the user by username instead of email
-        const user = await usersCollection.findOne({ username });
-        if (!user) {
-            return res.status(400).json({ message: "Invalid credentials!" });
-        }
+  try {
+      await connectClient();
+      const db = client.db("githubclone");
+      const usersCollection = db.collection("users");
 
-        // Compare the provided password with the hashed password in the database
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: "Invalid credentials!" });
-        }
+      // Find the user by username instead of email
+      const user = await usersCollection.findOne({ username });
+      if (!user) {
+          return res.status(400).json({ message: "Invalid credentials!" });
+      }
 
-        // Check the request source (CLI or frontend)
-        const isCLI = req.headers['x-request-source'] === 'cli'; // Check if it's a CLI request
+      // Compare the provided password with the hashed password in the database
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+          return res.status(400).json({ message: "Invalid credentials!" });
+      }
 
-        // Set different expiration times based on the source
-        const tokenExpiration = isCLI ? '30d' : '7d'; // 30 days for CLI, 1 hour for frontend
+      // Check the request source (CLI or frontend)
+      const isCLI = req.headers['x-request-source'] === 'cli'; // Check if it's a CLI request
 
-        // Generate a JWT token with the user's ID
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: tokenExpiration });
+      // Set different expiration times based on the source
+      const tokenExpiration = isCLI ? '30d' : '7d'; // 30 days for CLI, 7 days for frontend
 
-        // Respond with the token and user ID
-        res.json({ token: token, userId: user._id });
-    } catch (err) {
-        console.error("Error during login: ", err.message);
-        res.status(500).send("Server error!");
-    }
+      // Generate a JWT token with the user's ID
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: tokenExpiration });
+
+      // Log the token, userId, and username
+      console.log("User Logged In:");
+      console.log("Token:", token);
+      console.log("UserID:", user._id);
+      console.log("Username:", username);
+
+      // Respond with the token and user ID
+      res.json({ token: token, userId: user._id });
+  } catch (err) {
+      console.error("Error during login: ", err.message);
+      res.status(500).send("Server error!");
+  }
 }
 
 
@@ -149,7 +156,7 @@ async function getUserProfile(req, res) {
     const { type, userId } = req.query; // Extract the type (star, following, etc.) and userId from query params
   
     console.log("Received request for user profile");
-    console.log("Username from Params:", username);
+    console.log("Username from Params:", username)
     console.log("Query Type:", type);
     console.log("UserID from Query:", userId);
   
