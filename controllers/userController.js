@@ -112,7 +112,7 @@ async function login(req, res) {
       const isCLI = req.headers['x-request-source'] === 'cli'; // Check if it's a CLI request
 
       // Set different expiration times based on the source
-      const tokenExpiration = isCLI ? '30d' : '7d'; // 30 days for CLI, 7 days for frontend
+      const tokenExpiration = isCLI ? '30d' : '300d'; // 30 days for CLI, 7 days for frontend
 
       // Generate a JWT token with the user's ID
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: tokenExpiration });
