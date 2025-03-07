@@ -209,7 +209,7 @@ async function fetchRepositoriesForCurrentUser(req, res) {
   }
 }
 
-async function fetchRepositoriesByUserId(req, res) {
+async function fetchDashboardRepositories(req, res) {
   const { userId } = req.params; // Get the userId from route parameters
 
   try {
@@ -222,7 +222,7 @@ async function fetchRepositoriesByUserId(req, res) {
     console.error("Error fetching repositories:", err.message);
     res.status(500).send("Server error");
   }
-};
+}
 
 
 async function updateRepositoryByRepoName(req, res) {
@@ -929,5 +929,6 @@ module.exports = {
     generateMultiplePresignedUrls,
     generateDownloadUrls,
     checkVisibilityByName,
+    fetchDashboardRepositories,
 }
 
