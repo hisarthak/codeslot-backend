@@ -11,6 +11,7 @@ repoRouter.get("/repo/search", repoController.findUsersAndRepositories);
 // Specific repository routes
 repoRouter.get("/repo/name/:name", repoController.fetchRepositoryByName);
 repoRouter.get("/repo/user/:username", repoController.fetchRepositoriesForCurrentUser);
+repoRouter.post("/repo/user/dashboard/:userId", repoController.fetchRepositoriesByUserId);
 
 repoRouter.post("/repo/user/url/generate-urls", repoController.generateMultiplePresignedUrls);
 repoRouter.post("/repo/user/download/get-url", repoController.generateDownloadUrls);

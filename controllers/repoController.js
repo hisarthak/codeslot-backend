@@ -178,9 +178,6 @@ async function fetchRepositoriesForCurrentUser(req, res) {
   const { username } = req.params; // Get the username from the route parameter
   const { userId } = req.query; // Get the userId from the query parameters
 
-  // console.log("Fetching repositories for username:", username);
-  // console.log("Querying as userId:", userId);
-
   try {
     // Find the user by username to get their ownerId
     const user = await User.findOne({ username }).lean(); // Using lean() to get a plain JavaScript object
@@ -189,14 +186,8 @@ async function fetchRepositoriesForCurrentUser(req, res) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // console.log("Fetched User:", user);
-
-    // Determine if the requesting user is the same as the profile owner
     const isOwner = user._id.toString() === userId;
 
-    // console.log("Is Requesting User the Owner?:", isOwner);
-
-    // Fetch repositories based on ownership or visibility
     const query = isOwner
       ? { owner: user._id } // Fetch all repositories for the owner
       : { owner: user._id, visibility: true }; // Fetch only visible repositories for others
@@ -204,7 +195,7 @@ async function fetchRepositoriesForCurrentUser(req, res) {
     // Fetch repositories and populate the owner field with user details
     const repositories = await Repository.find(query).populate('owner'); // Populate the 'owner' field
 
-    console.log("Fetched Repositories:", repositories);
+    // console.log("Fetched Repositories:", repositories);
 
     // Return the repositories
     if (!repositories || repositories.length === 0) {
@@ -218,7 +209,20 @@ async function fetchRepositoriesForCurrentUser(req, res) {
   }
 }
 
+async function fetchRepositoriesByUserId(req, res) {
+  const { userId } = req.params; // Get the userId from route parameters
 
+  try {
+    // Fetch repositories for the given userId
+    const repositories = await Repository.find({ owner: userId }).select("name").lean();
+
+    // Return response
+    res.json({ message: "Repositories found!", repositories });
+  } catch (err) {
+    console.error("Error fetching repositories:", err.message);
+    res.status(500).send("Server error");
+  }
+};
 
 
 async function updateRepositoryByRepoName(req, res) {
