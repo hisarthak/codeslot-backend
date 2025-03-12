@@ -1,5 +1,12 @@
+# Environment files
 .env
+
+# SSL certificates
 fullchain.pem
 privkey.pem
+
+# Node.js dependencies
 node_modules/
+
+# Lock file
 package-lock.json
