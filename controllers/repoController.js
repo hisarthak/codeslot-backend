@@ -2,7 +2,6 @@ const mongoose = require ('mongoose');
 const Repository = require("../models/repoModel");
 
 const User = require("../models/userModel");
-const Issue = require("../models/issueModel");
 const axios = require('axios');
 const { s3, S3_BUCKET } = require("../config/aws-config");
 const path = require('path');
