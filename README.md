@@ -40,7 +40,7 @@ You can visit the website at [codeslot.in](https://codeslot.in).
 - **Backend:** AWS EC2
 
 ## **Frontend Repository**  
-The backend code for CodeSlot is available at:  
+The frontend code for CodeSlot is available at:  
 🔗 [CodeSlot-Frontend](https://github.com/hisarthak/codeslot-frontend)
 
 ## **Website Showcase**  
