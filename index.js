@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-
 // Suppress AWS SDK v2 maintenance mode warning
 const originalEmitWarning = process.emitWarning;
 
@@ -10,7 +9,6 @@ process.emitWarning = (warning, ...args) => {
     }
     originalEmitWarning(warning, ...args); // Allow other warnings
 };
-
 
 const express = require('express');
 const dotenv = require("dotenv");
@@ -97,10 +95,5 @@ db.once("open", async () => {
 httpServer.listen(port, '0.0.0.0', () => {
     console.log(`HTTPS Server is running on PORT ${port}`);
 });
-
-// // Comment out the HTTPS code and use HTTP for local testing:
-// httpServer = app.listen(port, '0.0.0.0', () => {
-//     console.log(`HTTP Server is running on PORT ${port}`);
-// });
 
 }

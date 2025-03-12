@@ -13,8 +13,6 @@ const jwt = require('jsonwebtoken');
 const { MongoClient } = require("mongodb");
 var ObjectId = require("mongodb").ObjectId;
 
-
-
 dotenv.config();
 const uri = process.env.MONGODB_URI;
 

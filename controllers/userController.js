@@ -8,7 +8,6 @@ const Repository = require("../models/repoModel");
 
 const User = require("../models/userModel");
 
-
 dotenv.config();
 const uri = process.env.MONGODB_URI;
 const autoLoginName = process.env.AUTO_LOGIN_NAME;
